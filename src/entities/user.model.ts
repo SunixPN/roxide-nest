@@ -1,6 +1,7 @@
 import { Column, Table, Model, HasOne, ForeignKey, HasMany, BelongsTo } from 'sequelize-typescript'
 import { BIGINT, INTEGER } from 'sequelize'
 import { Farm } from './farm.model'
+import { Bonus } from './bonus.model'
 
 export interface ICreateUser {
   telegramId: bigint,
@@ -21,6 +22,9 @@ export class User extends Model<User, ICreateUser> {
 
   @HasOne(() => Farm)
   Farm: Farm
+
+  @HasOne(() => Bonus)
+  Bonus: Bonus
 
   @BelongsTo(() => User, 'referrerId')
   Referrer: User

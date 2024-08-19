@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config'
 import { FarmModule } from './modules/farm/farm.module'
 import { ReferralModule } from './modules/referral/referral.module'
 import { TelegramModule } from './telegram/telegram.module'
+import { BonusModule } from './modules/bonus/bonus.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { TelegramModule } from './telegram/telegram.module'
     SequelizeModule.forRootAsync(options()),
     FarmModule,
     ReferralModule,
-    TelegramModule
+    TelegramModule,
+    BonusModule
   ],
   controllers: []
 })

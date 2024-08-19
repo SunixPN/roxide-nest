@@ -5,11 +5,12 @@ import {TelegramService} from './telegram.service';
 import {SequelizeModule} from '@nestjs/sequelize';
 import {User} from '../entities/user.model';
 import { Farm } from 'src/entities/farm.model';
+import { Bonus } from 'src/entities/bonus.model';
 
 @Module({
     imports: [
         TelegrafModule.forRoot(options),
-        SequelizeModule.forFeature([User, Farm])
+        SequelizeModule.forFeature([User, Farm, Bonus])
     ],
     providers: [TelegramService],
 })

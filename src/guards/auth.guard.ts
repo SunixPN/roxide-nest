@@ -36,12 +36,14 @@ export class AuthGuard implements CanActivate {
             return crypto.createHmac('sha256', key).update(value).digest()
         }
     
-        function hex(bytes) {
+        function hex(bytes: any) {
             return bytes.toString('hex');
         }
     
         const secret_key = HMAC_SHA256(options.token, 'WebAppData')
         const hashGenerate = hex(HMAC_SHA256(data_check_string, secret_key))
+
+        console.log(parsedData, hashGenerate, hash)
     
         if (hashGenerate !== hash) {
             throw new UnauthorizedException("No valid telegram data")

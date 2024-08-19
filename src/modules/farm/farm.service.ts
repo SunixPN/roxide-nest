@@ -1,20 +1,25 @@
 import { InjectModel } from '@nestjs/sequelize'
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { Farm } from '../../entities/farm.model'
+import { EnumFarmStatus } from 'src/enums/farmStatus.enum'
+import { User } from 'src/entities/user.model'
 
 @Injectable()
 export class FarmService {
   constructor(@InjectModel(Farm) private readonly farmRepository: typeof Farm) {
   }
 
-  async status(userId) {
-    const [farm, created] = await this.getFarm(userId)
+  async status(userId: number) {
+    const [farm] = await this.getFarm(userId)
 
-    return this.checkStatus(farm)
+    return {
+      status: this.checkStatus(farm),
+      start_time: farm.startTime
+    }
   }
 
-  async start(userId) {
-    const [farm, created] = await this.getFarm(userId)
+  async start(userId: number) {
+    const [farm] = await this.getFarm(userId)
 
     if (farm.startTime == null) {
 
@@ -23,25 +28,37 @@ export class FarmService {
       await farm.save()
     }
 
-    return {status: this.checkStatus(farm)}
+    else {
+      throw new BadRequestException("Farm has already been started")
+    }
+
+    return {
+        message: "Farm is successfuly start",
+        status: this.checkStatus(farm)
+    }
   }
 
-  async claim(user) {
-    const [farm, created] = await this.getFarm(user.id)
+  async claim(user: User) {
+    const [farm] = await this.getFarm(user.id)
 
     const status = this.checkStatus(farm)
 
-    if(status === 'claim') {
+    if (status === EnumFarmStatus.CLAIM) {
 
       farm.startTime = null
       user.coins = user.coins + 480
+
+      await user.save()
+      await farm.save()
+  
+      return {
+          message: "Farm is Successfully claim",
+          status: this.checkStatus(farm)
+      }
     }
 
-    await user.save()
-    await farm.save()
-
-    return {
-      status: this.checkStatus(farm)
+    else {
+      throw new BadRequestException("You can not claim now")
     }
   }
 
@@ -53,18 +70,18 @@ export class FarmService {
     })
   }
 
-  private checkStatus(farm) {
+  private checkStatus(farm: Farm) {
 
     if (farm.startTime === null) {
-      return 'start'
+      return EnumFarmStatus.START
     }
 
     const diff = ((new Date()).getTime() - farm.startTime.getTime()) / 3600000
 
     if (diff >= 12) {
-      return 'claim'
+      return EnumFarmStatus.CLAIM
     }
 
-    return 'farming'
+    return EnumFarmStatus.FARMING
   }
 }
