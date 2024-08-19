@@ -2,8 +2,13 @@ import { Column, Table, Model, HasOne, ForeignKey, HasMany, BelongsTo } from 'se
 import { BIGINT, INTEGER } from 'sequelize'
 import { Farm } from './farm.model'
 
+export interface ICreateUser {
+  telegramId: bigint,
+  referrerId?: number
+}
+
 @Table
-export class User extends Model {
+export class User extends Model<User, ICreateUser> {
   @Column({ type: BIGINT, unique: true, allowNull: false })
   telegramId: bigint
 

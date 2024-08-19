@@ -2,8 +2,12 @@ import { Column, Table, Model, ForeignKey, BelongsTo } from 'sequelize-typescrip
 import { DATE, INTEGER } from 'sequelize'
 import { User } from './user.model'
 
+interface IFarmCreate {
+  startTime: Date | null
+}
+
 @Table
-export class Farm extends Model {
+export class Farm extends Model<Farm> {
 
   @ForeignKey(() => User)
   @Column({ type: INTEGER, allowNull: false, onDelete: 'cascade', onUpdate: 'cascade' })

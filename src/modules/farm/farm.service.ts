@@ -40,7 +40,9 @@ export class FarmService {
     await user.save()
     await farm.save()
 
-    return {status: this.checkStatus(farm)}
+    return {
+      status: this.checkStatus(farm)
+    }
   }
 
   private getFarm(userId: number) {
