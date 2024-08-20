@@ -101,13 +101,20 @@ export class TaskService {
         }
     }
 
-    async goToLink(res: Response, link: string, id: number, telegram_id: number) {
+    async goToLink(link: string, id: number, telegram_id: number) {
         const user = await this.userRepository.findOne({
             where: {
                 telegramId: telegram_id 
             }
         })
+
+        if (!user) {
+            throw new BadRequestException("User not found")
+        }
+
         const task = await this.findTask(id)
+
+        console.log(user, task)
 
         if (task.link !== link) {
             throw new BadRequestException("Invalid task link")
@@ -123,7 +130,9 @@ export class TaskService {
 
         await userTask.save()
 
-        res.redirect(decodeURIComponent(link))
+        return {
+            url: decodeURIComponent(link)
+        }
     }
 
     async claimTaskCoins(user: User, id: number) {

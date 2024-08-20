@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Redirect, Req, Res, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { ITaskCreate } from 'src/entities/task.model';
 import { User } from 'src/entities/user.model';
@@ -28,13 +28,13 @@ export class TaskController {
   }
 
   @Get("/goToLink/:telegram_id/:link/:id")
+  @Redirect()
   goToLink(
     @Param("link") link: string,
     @Param("id") id: string,
     @Param("telegram_id") telegram_id: string,
-    @Res() res: Response
   ) {
-    return this.taskService.goToLink(res, link, +id, +telegram_id)
+    return this.taskService.goToLink(link, +id, +telegram_id)
   }
 
   @Post("/claim-task-coins/:id")
