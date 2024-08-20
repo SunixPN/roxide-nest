@@ -78,7 +78,7 @@ export class TaskService {
                 ]
             }],
 
-            order: [ ["id", "DESC"] ]
+            order: [[{ model: Task, as: "Task" },  "id", "DESC"]]
         })
 
         return {
