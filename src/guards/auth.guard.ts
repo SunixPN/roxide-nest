@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
         const parsedData = JSON.parse(authDataSplit);
 
         const buffer = Buffer.from(parsedData.user, 'latin1')
-        parsedData.user = JSON.parse(buffer.toString('utf-8'))
+        parsedData.user = buffer.toString('utf-8')
 
         console.log(parsedData)
 
