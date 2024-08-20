@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
 import { options } from 'config/telegram.config';
 import {Start, Update, Ctx} from 'nestjs-telegraf';
@@ -14,8 +15,9 @@ export class TelegramService extends Telegraf<Context> {
     constructor(
         @InjectModel(User) private readonly userRepository: typeof User,
         @InjectModel(Farm) private readonly farmRepository: typeof Farm,
-        @InjectModel(Bonus) private readonly bonusRepository: typeof Bonus
-        ) { super(options.token) }
+        @InjectModel(Bonus) private readonly bonusRepository: typeof Bonus,
+        private readonly configService: ConfigService
+        ) { super(configService.get<string>("TELEGRAM_BOT_TOKEN")) }
 
     @Start()
     async index(@Ctx() ctx: Context) {

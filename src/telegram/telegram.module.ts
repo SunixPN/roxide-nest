@@ -9,7 +9,7 @@ import { Bonus } from 'src/entities/bonus.model';
 
 @Module({
     imports: [
-        TelegrafModule.forRoot(options),
+        TelegrafModule.forRootAsync(options()),
         SequelizeModule.forFeature([User, Farm, Bonus])
     ],
     providers: [TelegramService],

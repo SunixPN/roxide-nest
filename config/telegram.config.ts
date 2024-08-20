@@ -1,7 +1,14 @@
-import {TelegrafModuleOptions} from 'nestjs-telegraf';
+import { ConfigService } from '@nestjs/config';
+import {TelegrafModuleAsyncOptions, TelegrafModuleOptions} from 'nestjs-telegraf';
 
-export const options: TelegrafModuleOptions = {
-  botName: 'RoxideBot',
-  token: '7398504620:AAHW9D_tsnwxBHiSInT2ZcOqZb2_F1L0BcE',
-  // token: '1862342138:AAFmB3jCRSKjYzyR0zOZQMD5ZUeI0V0zMUo'
+export const options = (): TelegrafModuleAsyncOptions => {
+  return {
+    inject: [ConfigService],
+    useFactory: (config: ConfigService): TelegrafModuleOptions => {
+      return {
+        botName: config.get<string>("TELEGRAM_BOT_NAME"),
+        token: config.get<string>("TELEGRAM_BOT_TOKEN")
+      }
+    }
+  }
 }

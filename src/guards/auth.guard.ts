@@ -3,6 +3,7 @@ import { options } from './../../config/telegram.config';
 import * as crypto from "crypto"
 import { User } from "src/entities/user.model";
 import { InjectModel } from "@nestjs/sequelize";
+import { ConfigService } from "@nestjs/config";
 
 interface IRequest extends Request {
     user: User
@@ -10,7 +11,10 @@ interface IRequest extends Request {
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(@InjectModel(User) private readonly userRepository: typeof User) {}
+    constructor(
+        @InjectModel(User) private readonly userRepository: typeof User,
+        private readonly configService: ConfigService
+    ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest<IRequest>()
@@ -39,8 +43,10 @@ export class AuthGuard implements CanActivate {
         function hex(bytes: any) {
             return bytes.toString('hex');
         }
-    
-        const secret_key = HMAC_SHA256(options.token, 'WebAppData')
+
+        const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
+
+        const secret_key = HMAC_SHA256(token, 'WebAppData')
         const hashGenerate = hex(HMAC_SHA256(data_check_string, secret_key))
 
         console.log(parsedData, hashGenerate, hash)
