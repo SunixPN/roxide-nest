@@ -16,8 +16,7 @@ export class TaskService {
 
     async createTask(task: ITaskCreate) {
         const newTask = await this.taskRepository.create({
-            ...task,
-            link: encodeURIComponent(task.link)
+            ...task
         })
 
         const users = await this.userRepository.findAll()
@@ -114,8 +113,6 @@ export class TaskService {
 
         const task = await this.findTask(id)
 
-        console.log(link)
-
         if (task.dataValues.link !== link) {
             throw new BadRequestException("Invalid task link")
         }
@@ -131,7 +128,7 @@ export class TaskService {
         await userTask.save()
 
         return {
-            url: decodeURIComponent(link)
+            url: link
         }
     }
 
