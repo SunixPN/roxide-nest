@@ -42,6 +42,8 @@ export class AuthGuard implements CanActivate {
             return bytes.toString('hex');
         }
 
+        console.log(parsedData)
+
         const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
 
         const secret_key = HMAC_SHA256(token, 'WebAppData')

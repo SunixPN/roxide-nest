@@ -129,9 +129,11 @@ export class TaskService {
             throw new BadRequestException("You can not claim coins from this task")
         }
 
+        userTask.task_status = EnumTaskStatus.CLAIMED
         user.coins += task.coins
 
         await user.save()
+        await userTask.save()
 
         return {
             message: 'Coins successfully claim',
