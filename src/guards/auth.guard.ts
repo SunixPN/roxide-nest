@@ -24,9 +24,9 @@ export class AuthGuard implements CanActivate {
 
         const authDataSplit = authHeader.split(" ")[1]
 
-        const parsedData = JSON.parse(authDataSplit)
+        console.log(authDataSplit, "DATA FROM")
 
-        parsedData.user = JSON.parse(parsedData.user)
+        const parsedData = JSON.parse(authDataSplit)
 
         const hash = parsedData.hash
         const data_keys = Object.keys(parsedData).filter(v => v !== 'hash').sort()
