@@ -67,13 +67,26 @@ export class TaskService {
 
             include: [{
                 model: Task,
-                where: {
-                    main_task_id: null
-                },
                 include: [
                     {
                         model: Task,
-                        as: "sub_tasks"
+                        as: "sub_tasks",
+                        include: [
+                            {
+                                model: UserTask,
+                                where: {
+                                    user_id: user.id
+                                },
+                                required: false
+                            }
+                        ]
+                    },
+                    {
+                        model: UserTask,
+                        where: {
+                            user_id: user.id
+                        },
+                        required: false
                     }
                 ]
             }],
@@ -85,6 +98,10 @@ export class TaskService {
                 ...userTasks.map(userTask => ({
                     ...userTask.task.dataValues,
                     status: userTask.task_status,
+                    sub_tasks: userTask.task.sub_tasks.map(sub_task => ({
+                        ...sub_task.dataValues,
+                        status: sub_task.userTasks.length > 0 ? sub_task.userTasks[0].task_status : EnumTaskStatus.PENDING
+                    }))
                 }))
             ]
         }

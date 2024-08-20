@@ -35,4 +35,7 @@ export class Task extends Model<Task, ITaskCreate> {
 
   @BelongsToMany(() => User, () => UserTask)
   users: User[]
+
+  @HasMany(() => UserTask, "task_id")
+  userTasks: UserTask[]
 }
