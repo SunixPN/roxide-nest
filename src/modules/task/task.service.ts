@@ -51,16 +51,25 @@ export class TaskService {
                 })
             })
         )
+
+        return {
+            status: "created",
+            task: newTask
+        }
     }
 
     async getAllTasksWithUser(user: User) {
         const userTasks = await this.userTaskRepository.findAll({
             where: {
-                user_id: user.id
+                user_id: user.id,
             },
 
             include: [{
                 model: Task,
+                where: {
+                    main_task_id: null
+                },
+
                 include: [
                     {
                         model: Task,
