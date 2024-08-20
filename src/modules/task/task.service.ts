@@ -17,7 +17,7 @@ export class TaskService {
     async createTask(task: ITaskCreate) {
         const newTask = await this.taskRepository.create({
             ...task,
-            link: decodeURIComponent(task.link)
+            link: encodeURIComponent(task.link)
         })
 
         const users = await this.userRepository.findAll()
@@ -123,7 +123,7 @@ export class TaskService {
 
         await userTask.save()
 
-        res.redirect(encodeURIComponent(link))
+        res.redirect(decodeURIComponent(link))
     }
 
     async claimTaskCoins(user: User, id: number) {
