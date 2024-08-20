@@ -12,7 +12,7 @@ import { Task } from 'src/entities/task.model';
   controllers: [UserController],
   providers: [UserService],
   imports: [
-    SequelizeModule.forFeature([User, Farm, Bonus, UserTask, Task])
+    SequelizeModule.forFeature([User, Farm, Bonus, Task, UserTask])
   ]
 })
 export class UserModule {}

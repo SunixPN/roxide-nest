@@ -7,11 +7,13 @@ import {User} from '../entities/user.model';
 import { Farm } from 'src/entities/farm.model';
 import { Bonus } from 'src/entities/bonus.model';
 import { UserService } from 'src/modules/user/user.service';
+import { Task } from 'src/entities/task.model';
+import { UserTask } from 'src/entities/userTask.model';
 
 @Module({
     imports: [
         TelegrafModule.forRootAsync(options()),
-        SequelizeModule.forFeature([User, Farm, Bonus])
+        SequelizeModule.forFeature([User, Farm, Bonus, Task, UserTask]),
     ],
     providers: [TelegramService, UserService],
 })
