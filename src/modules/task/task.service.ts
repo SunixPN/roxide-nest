@@ -49,7 +49,7 @@ export class TaskService {
             status: "Ok",
             tasks: [
                 ...userTasks.map(userTask => ({
-                    ...userTask.task,
+                    ...userTask.task.dataValues,
                     status: userTask.task_status
                 }))
             ]

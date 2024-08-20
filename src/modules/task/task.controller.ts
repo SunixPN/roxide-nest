@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { ITaskCreate } from 'src/entities/task.model';
 import { User } from 'src/entities/user.model';
@@ -23,7 +23,7 @@ export class TaskController {
 
   @Post("/start-task/:id")
   @UseGuards(AuthGuard)
-  startTask(@Req() { user }, @Query("id") id: string) {
+  startTask(@Req() { user }, @Param("id") id: string) {
     return this.taskService.startTask(user, +id)
   }
 
@@ -31,8 +31,8 @@ export class TaskController {
   @UseGuards(AuthGuard)
   goToLink(
     @Req() { user }, 
-    @Query("link") link: string,
-    @Query("id") id: string,
+    @Param("link") link: string,
+    @Param("id") id: string,
     @Res() res: Response
   ) {
     return this.taskService.goToLink(user, res, link, +id)
@@ -40,7 +40,7 @@ export class TaskController {
 
   @Post("/claim-task-coins/:id")
   @UseGuards(AuthGuard)
-  claimCoins(@Req() { user },  @Query("id") id: string) {
+  claimCoins(@Req() { user },  @Param("id") id: string) {
     return this.taskService.claimTaskCoins(user, +id)
   }
 }
