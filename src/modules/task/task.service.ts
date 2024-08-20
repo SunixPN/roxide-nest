@@ -98,8 +98,10 @@ export class TaskService {
                 ...userTasks.map(userTask => ({
                     ...userTask.task.dataValues,
                     status: userTask.task_status,
+                    userTasks: undefined,
                     sub_tasks: userTask.task.sub_tasks.map(sub_task => ({
                         ...sub_task.dataValues,
+                        userTasks: undefined,
                         status: sub_task.userTasks.length > 0 ? sub_task.userTasks[0].task_status : EnumTaskStatus.PENDING
                     }))
                 }))
