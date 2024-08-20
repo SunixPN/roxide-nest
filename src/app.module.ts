@@ -8,6 +8,7 @@ import { FarmModule } from './modules/farm/farm.module'
 import { ReferralModule } from './modules/referral/referral.module'
 import { TelegramModule } from './telegram/telegram.module'
 import { BonusModule } from './modules/bonus/bonus.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { BonusModule } from './modules/bonus/bonus.module';
     FarmModule,
     ReferralModule,
     TelegramModule,
-    BonusModule
+    BonusModule,
+    UserModule
   ],
   controllers: []
 })

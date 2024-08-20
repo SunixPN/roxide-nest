@@ -18,7 +18,7 @@ inject: [ConfigService],
         database: config.get<string>('DB_DATABASE'),
         models: [User, Farm, Bonus],
         autoLoadModels: true,
-        sync: { force: true },
+        sync: { alter: true },
       }
     }
   }

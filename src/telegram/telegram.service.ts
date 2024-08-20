@@ -1,9 +1,8 @@
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
 import {Start, Update, Ctx} from 'nestjs-telegraf';
-import { Bonus } from 'src/entities/bonus.model';
-import { Farm } from 'src/entities/farm.model';
 import { ICreateUser, User } from 'src/entities/user.model';
+import { UserService } from 'src/modules/user/user.service';
 import {Scenes, Telegraf} from 'telegraf';
 
 type Context = Scenes.SceneContext
@@ -13,8 +12,7 @@ export class TelegramService extends Telegraf<Context> {
 
     constructor(
         @InjectModel(User) private readonly userRepository: typeof User,
-        @InjectModel(Farm) private readonly farmRepository: typeof Farm,
-        @InjectModel(Bonus) private readonly bonusRepository: typeof Bonus,
+        private readonly userService: UserService,
         private readonly configService: ConfigService
         ) { super(configService.get<string>("TELEGRAM_BOT_TOKEN")) }
 
@@ -53,31 +51,13 @@ export class TelegramService extends Telegraf<Context> {
 
                 new_user.referrerId = ref_user.id
             }
-            
-            const user = await this.userRepository.create({
-                ...new_user
-            })
 
-            const farm = await this.farmRepository.create({
-                startTime: null,
-                userId: user.id
-            })
-
-            const currentDate = new Date()
-            currentDate.setDate(currentDate.getDate() + 1)
-
-            const bonus = await this.bonusRepository.create({
-                userId: user.id,
-                next_bonus_time: currentDate
-            })
-
-            await user.$set("Farm", farm)
-            await user.$set("Bonus", bonus)
+            await this.userService.createUser(new_user)
         }
 
         ctx.replyWithHTML(
             `
-            <b>Привет, ${ctx.from.username}</b>\n Начнём игру ?
+            <b>Привет, ${ctx.from.username}</b>\nНачнём игру ?
             `
         )
     }

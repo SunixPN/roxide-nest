@@ -9,12 +9,13 @@ export class FarmService {
   constructor(@InjectModel(Farm) private readonly farmRepository: typeof Farm) {
   }
 
-  async status(userId: number) {
-    const [farm] = await this.getFarm(userId)
+  async status(user: User) {
+    const [farm] = await this.getFarm(user.id)
 
     return {
       status: this.checkStatus(farm),
-      start_time: farm.startTime
+      start_time: farm.startTime,
+      coins: user.coins
     }
   }
 

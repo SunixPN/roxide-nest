@@ -10,7 +10,7 @@ export class FarmController {
   @Get('/status')
   @UseGuards(AuthGuard)
   async status(@Req() { user }) {
-    return await this.farmService.status(user.id)
+    return await this.farmService.status(user)
   }
 
   @Post('/claim')
