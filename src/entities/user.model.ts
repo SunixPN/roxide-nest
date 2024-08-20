@@ -17,7 +17,7 @@ export class User extends Model<User, ICreateUser> {
   @Column({ type: INTEGER, allowNull: true, onUpdate: 'cascade', onDelete: 'set null' })
   referrerId: number
 
-  @Column({ type: BIGINT, allowNull: false, defaultValue: 0 })
+  @Column({ type: INTEGER, allowNull: false, defaultValue: 0 })
   coins: number
 
   @HasOne(() => Farm)

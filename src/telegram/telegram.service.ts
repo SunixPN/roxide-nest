@@ -1,6 +1,5 @@
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
-import { options } from 'config/telegram.config';
 import {Start, Update, Ctx} from 'nestjs-telegraf';
 import { Bonus } from 'src/entities/bonus.model';
 import { Farm } from 'src/entities/farm.model';
