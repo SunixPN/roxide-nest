@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 import { ITaskCreate, Task } from 'src/entities/task.model';
 import { User } from 'src/entities/user.model';
 import { UserTask } from 'src/entities/userTask.model';
@@ -68,7 +69,9 @@ export class TaskService {
                 model: Task,
                 order: ["id"],
                 where: {
-                    main_task_id: null
+                    main_task_id: {
+                        [Op.is]: null
+                    }
                 },
 
                 include: [
@@ -77,7 +80,8 @@ export class TaskService {
                         as: "sub_tasks"
                     }
                 ]
-            }]
+            }],
+            order: [[ Task, "id", "DESC" ]]
         })
 
         return {
