@@ -16,7 +16,8 @@ export class TaskService {
 
     async createTask(task: ITaskCreate) {
         const newTask = await this.taskRepository.create({
-            ...task
+            ...task,
+            link: decodeURIComponent(task.link)
         })
 
         const users = await this.userRepository.findAll()
@@ -47,7 +48,7 @@ export class TaskService {
 
         return {
             status: "Ok",
-            tasks: [
+            content: [
                 ...userTasks.map(userTask => ({
                     ...userTask.task.dataValues,
                     status: userTask.task_status
@@ -100,7 +101,12 @@ export class TaskService {
         }
     }
 
-    async goToLink(user: User, res: Response, link: string, id: number) {
+    async goToLink(res: Response, link: string, id: number, telegram_id: number) {
+        const user = await this.userRepository.findOne({
+            where: {
+                telegramId: telegram_id 
+            }
+        })
         const task = await this.findTask(id)
 
         if (task.link !== link) {
@@ -117,7 +123,7 @@ export class TaskService {
 
         await userTask.save()
 
-        res.redirect(link)
+        res.redirect(encodeURIComponent(link))
     }
 
     async claimTaskCoins(user: User, id: number) {

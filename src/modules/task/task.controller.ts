@@ -27,15 +27,14 @@ export class TaskController {
     return this.taskService.startTask(user, +id)
   }
 
-  @Post("/goToLink/:link/:id")
-  @UseGuards(AuthGuard)
+  @Post("/goToLink/:telegram_id/:link/:id")
   goToLink(
-    @Req() { user }, 
     @Param("link") link: string,
     @Param("id") id: string,
+    @Param("telegram_id") telegram_id: string,
     @Res() res: Response
   ) {
-    return this.taskService.goToLink(user, res, link, +id)
+    return this.taskService.goToLink(res, link, +id, +telegram_id)
   }
 
   @Post("/claim-task-coins/:id")
