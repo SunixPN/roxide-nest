@@ -1,6 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Response } from 'express';
 import { ITaskCreate, Task } from 'src/entities/task.model';
 import { User } from 'src/entities/user.model';
 import { UserTask } from 'src/entities/userTask.model';
@@ -36,13 +35,39 @@ export class TaskService {
         }
     }
 
+    async createSubTask(task: ITaskCreate, main_task_id: number) {
+        const newTask = await this.taskRepository.create({
+            ...task,
+            main_task_id: main_task_id
+        })
+
+        const users = await this.userRepository.findAll()
+
+        await Promise.all(
+            users.map(async user => {
+                await this.userTaskRepository.create({
+                    user_id: user.id,
+                    task_id: newTask.id,
+                })
+            })
+        )
+    }
+
     async getAllTasksWithUser(user: User) {
         const userTasks = await this.userTaskRepository.findAll({
             where: {
                 user_id: user.id
             },
 
-            include: [Task]
+            include: [{
+                model: Task,
+                include: [
+                    {
+                        model: Task,
+                        as: "sub_tasks"
+                    }
+                ]
+            }]
         })
 
         return {
@@ -50,9 +75,18 @@ export class TaskService {
             content: [
                 ...userTasks.map(userTask => ({
                     ...userTask.task.dataValues,
-                    status: userTask.task_status
+                    status: userTask.task_status,
                 }))
             ]
+        }
+    }
+
+    async getTaskWithUserById(user: User, id: number) {
+        const userTask = await this.findUserTask(user.id, id)
+
+        return {
+            ...userTask.task.dataValues,
+            status: userTask.task_status
         }
     }
 

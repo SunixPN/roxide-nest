@@ -1,8 +1,7 @@
-import { Body, Controller, Get, Param, Post, Query, Redirect, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Redirect, Req, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { ITaskCreate } from 'src/entities/task.model';
 import { User } from 'src/entities/user.model';
-import { Response } from 'express';
 import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('task')
@@ -15,10 +14,22 @@ export class TaskController {
     return this.taskService.createTask(task)
   }
 
+  @Post("/create-sub/:id")
+  @UseGuards(AuthGuard)
+  createSubTask(@Body() task: ITaskCreate, @Param("id") id: string) {
+    return this.taskService.createSubTask(task, +id)
+  }
+
   @Get("/all-tasks-with-user")
   @UseGuards(AuthGuard)
   allTasksWithUser(@Req() { user }) {
     return this.taskService.getAllTasksWithUser(user as User)
+  }
+
+  @Get("/task-with-user/:id")
+  @UseGuards(AuthGuard)
+  taskById(@Req() { user }, @Param("id") id: string) {
+    return this.taskService.getTaskWithUserById(user as User, +id)
   }
 
   @Post("/start-task/:id")
