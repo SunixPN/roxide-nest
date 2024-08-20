@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Bonus } from 'src/entities/bonus.model';
 import { Farm } from 'src/entities/farm.model';
+import { Task } from 'src/entities/task.model';
 import { ICreateUser, User } from 'src/entities/user.model';
+import { UserTask } from 'src/entities/userTask.model';
 
 @Injectable()
 export class UserService {
@@ -10,6 +12,8 @@ export class UserService {
         @InjectModel(User) private readonly userRepository: typeof User,
         @InjectModel(Farm) private readonly farmRepository: typeof Farm,
         @InjectModel(Bonus) private readonly bonusRepository: typeof Bonus,
+        @InjectModel(Task) private readonly taskRepository: typeof Task,
+        @InjectModel(UserTask) private readonly userTaskRepository: typeof UserTask
         ) {}
 
     async createUser(new_user: ICreateUser) {
@@ -32,6 +36,16 @@ export class UserService {
 
         await user.$set("Farm", farm)
         await user.$set("Bonus", bonus)
+
+        const tasks = await this.taskRepository.findAll()
+
+        await Promise.all(
+            tasks.map(async task => {
+                await this.userTaskRepository.create({
+                    task_id: task.id,
+                    user_id: user.id
+                })
+        }))
     }
 
     async referalUserList(user: User) {

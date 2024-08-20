@@ -20,7 +20,7 @@ inject: [ConfigService],
         database: config.get<string>('DB_DATABASE'),
         models: [User, Farm, Bonus, Task, UserTask],
         autoLoadModels: true,
-        sync: { alter: true },
+        sync: { force: true },
       }
     }
   }
