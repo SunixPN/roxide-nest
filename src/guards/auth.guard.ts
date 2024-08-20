@@ -1,11 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
-import { options } from './../../config/telegram.config';
-import * as crypto from "crypto"
 import { User } from "src/entities/user.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { ConfigService } from "@nestjs/config";
 
-interface IRequest extends Request {
+export interface IRequest extends Request {
     user: User
 }
 

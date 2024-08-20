@@ -1,7 +1,9 @@
-import { Column, Table, Model, HasOne, ForeignKey, HasMany, BelongsTo } from 'sequelize-typescript'
+import { Column, Table, Model, HasOne, ForeignKey, HasMany, BelongsTo, BelongsToMany } from 'sequelize-typescript'
 import { BIGINT, INTEGER } from 'sequelize'
 import { Farm } from './farm.model'
 import { Bonus } from './bonus.model'
+import { Task } from './task.model'
+import { UserTask } from './userTask.model'
 
 export interface ICreateUser {
   telegramId: bigint,
@@ -31,4 +33,7 @@ export class User extends Model<User, ICreateUser> {
 
   @HasMany(() => User, 'referrerId')
   Referrals: User[]
+
+  @BelongsToMany(() => Task, () => UserTask)
+  tasks: Task[]
 }

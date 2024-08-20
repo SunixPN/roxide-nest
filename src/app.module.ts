@@ -9,6 +9,7 @@ import { ReferralModule } from './modules/referral/referral.module'
 import { TelegramModule } from './telegram/telegram.module'
 import { BonusModule } from './modules/bonus/bonus.module';
 import { UserModule } from './modules/user/user.module';
+import { TaskModule } from './modules/task/task.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { UserModule } from './modules/user/user.module';
     ReferralModule,
     TelegramModule,
     BonusModule,
-    UserModule
+    UserModule,
+    TaskModule
   ],
   controllers: []
 })
