@@ -114,7 +114,7 @@ export class TaskService {
 
         const task = await this.findTask(id)
 
-        console.log(user, task.link)
+        console.log(link)
 
         if (task.dataValues.link !== link) {
             throw new BadRequestException("Invalid task link")
