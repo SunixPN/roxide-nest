@@ -27,7 +27,7 @@ export class TaskController {
     return this.taskService.startTask(user, +id)
   }
 
-  @Post("/goToLink/:telegram_id/:link/:id")
+  @Get("/goToLink/:telegram_id/:link/:id")
   goToLink(
     @Param("link") link: string,
     @Param("id") id: string,
