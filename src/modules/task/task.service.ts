@@ -67,13 +67,9 @@ export class TaskService {
 
             include: [{
                 model: Task,
-                order: [["id", "DESC"]],
                 where: {
-                    main_task_id: {
-                        [Op.is]: null
-                    }
+                    main_task_id: null
                 },
-
                 include: [
                     {
                         model: Task,
@@ -81,7 +77,8 @@ export class TaskService {
                     }
                 ]
             }],
-            // order: [[ Task, "id", "DESC" ]]
+
+            order: [ ["id", "DESC"] ]
         })
 
         return {
