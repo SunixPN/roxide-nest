@@ -66,6 +66,7 @@ export class TaskService {
 
             include: [{
                 model: Task,
+                order: ["id"],
                 where: {
                     main_task_id: null
                 },
