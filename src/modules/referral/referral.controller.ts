@@ -16,7 +16,7 @@ export class ReferralController {
   @Get('/my')
   @UseGuards(AuthGuard)
   async referrals(@Req() { user }) {
-    return await this.referralService.referrals(user.id)
+    return await this.referralService.referrals(user)
   }
 
 }

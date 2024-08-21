@@ -6,7 +6,9 @@ import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('task')
 export class TaskController {
-  constructor(private readonly taskService: TaskService) {}
+  constructor(
+    private readonly taskService: TaskService
+    ) {}
 
   @Post("/create")
   @UseGuards(AuthGuard)
@@ -46,6 +48,12 @@ export class TaskController {
     @Param("telegram_id") telegram_id: string,
   ) {
     return this.taskService.goToLink(link, +id, +telegram_id)
+  }
+
+  @Post("/check-subscribe/:id")
+  @UseGuards(AuthGuard)
+  checkSubscribe(@Param("id") id: string, @Req() { user }) {
+    return this.taskService.checkSubscribe(user as User, +id)
   }
 
   @Post("/claim-task-coins/:id")

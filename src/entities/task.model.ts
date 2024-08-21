@@ -8,6 +8,7 @@ export interface ITaskCreate {
     description?: string,
     link?: string,
     coins?: number,
+    channel_id?: string,
     main_task_id: number
 }
 
@@ -22,6 +23,9 @@ export class Task extends Model<Task, ITaskCreate> {
 
   @Column({ allowNull: true, type: STRING })
   link: string
+
+  @Column({ allowNull: true, type: STRING })
+  channel_id: string
 
   @ForeignKey(() => Task)
   @Column({ allowNull: true, type: INTEGER, onDelete: "cascade", onUpdate: "cascade" })

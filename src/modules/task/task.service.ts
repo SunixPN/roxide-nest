@@ -5,13 +5,15 @@ import { ITaskCreate, Task } from 'src/entities/task.model';
 import { User } from 'src/entities/user.model';
 import { UserTask } from 'src/entities/userTask.model';
 import { EnumTaskStatus } from 'src/enums/taskStatus.enum';
+import { TelegramService } from 'src/telegram/telegram.service';
 
 @Injectable()
 export class TaskService {
     constructor(
         @InjectModel(Task) private readonly taskRepository: typeof Task,
         @InjectModel(User) private readonly userRepository: typeof User,
-        @InjectModel(UserTask) private readonly userTaskRepository: typeof UserTask
+        @InjectModel(UserTask) private readonly userTaskRepository: typeof UserTask,
+        private readonly telegramService: TelegramService
     ) {}
 
     async createTask(task: ITaskCreate) {
@@ -80,19 +82,17 @@ export class TaskService {
                                 where: {
                                     user_id: user.id
                                 },
-                                required: false
+                                required: false,
                             }
                         ]
                     },
-                    {
-                        model: UserTask,
-                        where: {
-                            user_id: user.id
-                        },
-                        required: false
-                    }
                 ]
             }],
+
+            order: [
+                [ { model: Task, as: "task" }, "id", "DESC" ],
+                [ { model: Task, as: "task" }, { model: Task, as: "sub_tasks" }, "id", "DESC" ]
+            ]
         })
 
         return {
@@ -101,11 +101,10 @@ export class TaskService {
                 ...userTasks.map(userTask => ({
                     ...userTask.task.dataValues,
                     status: userTask.task_status,
-                    userTasks: undefined,
                     sub_tasks: userTask.task.sub_tasks.map(sub_task => ({
                         ...sub_task.dataValues,
                         userTasks: undefined,
-                        status: sub_task.userTasks.length > 0 ? sub_task.userTasks[0].task_status : EnumTaskStatus.PENDING
+                        status: sub_task.userTasks[0].task_status
                     }))
                 }))
             ]
@@ -155,6 +154,16 @@ export class TaskService {
             throw new BadRequestException("You can not start this task")
         }
 
+        if (task.main_task_id) {
+            const userMainTask = await this.findUserTask(user.id, task.main_task_id)
+
+            if (userMainTask.task_status !== EnumTaskStatus.IN_PROGRESS) {
+                userMainTask.task_status = EnumTaskStatus.IN_PROGRESS
+
+                await userMainTask.save()
+            }
+        }
+
         userTask.task_status = EnumTaskStatus.IN_PROGRESS
 
         await userTask.save()
@@ -162,6 +171,36 @@ export class TaskService {
         return {
             message: "Task is successfuly start",
             status: userTask.task_status
+        }
+    }
+
+    private async updateMainTask(task: Task, user: User) {
+        if (task.main_task_id) {
+            const mainTask = await this.taskRepository.findOne({
+                where: {
+                    id: task.main_task_id
+                },
+
+                include: {
+                    model: Task,
+                    as: "sub_tasks"
+                }
+            })
+
+            const userSubTasks = await this.userTaskRepository.findAll({
+                where: {
+                    user_id: user.id,
+                    task_id: mainTask.sub_tasks.map(task => task.id) 
+                }
+            })
+
+            if (userSubTasks.every(userTask => userTask.task_status === EnumTaskStatus.COMPLETED )) {
+                const userMainTask = await this.findUserTask(user.id, task.main_task_id)
+
+                userMainTask.task_status = EnumTaskStatus.COMPLETED
+
+                await userMainTask.save()
+            }
         }
     }
 
@@ -192,6 +231,8 @@ export class TaskService {
 
         await userTask.save()
 
+        await this.updateMainTask(task, user)
+
         return {
             url: link
         }
@@ -202,7 +243,7 @@ export class TaskService {
 
         const userTask = await this.findUserTask(user.id, task.id)
 
-        if (userTask.task_status !== EnumTaskStatus.COMPLETED) {
+        if (userTask.task_status !== EnumTaskStatus.COMPLETED || task.main_task_id) {
             throw new BadRequestException("You can not claim coins from this task")
         }
 
@@ -214,6 +255,33 @@ export class TaskService {
 
         return {
             message: 'Coins successfully claim',
+            status: userTask.task_status
+        }
+    }
+
+    async checkSubscribe(user: User, id: number) {
+        const task = await this.findTask(id)
+
+        if (!task.dataValues.channel_id) {
+            throw new BadRequestException("There are no channel for this task")
+        }
+
+        const userTask = await this.findUserTask(user.id, task.id)
+
+        if (userTask.task_status !== EnumTaskStatus.IN_PROGRESS) {
+            throw new BadRequestException("You can not complete this task")
+        }
+
+        await this.telegramService.checkSubscribe(user.telegramId, task.dataValues.channel_id)
+
+        userTask.task_status = EnumTaskStatus.COMPLETED
+
+        await userTask.save()
+
+        await this.updateMainTask(task, user)
+
+        return {
+            message: 'You are subscribed',
             status: userTask.task_status
         }
     }

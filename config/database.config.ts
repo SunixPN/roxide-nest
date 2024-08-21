@@ -9,10 +9,11 @@ import { UserTask } from 'src/entities/userTask.model';
 export const options = (): SequelizeModuleAsyncOptions => {
   return {
     imports: [],
-inject: [ConfigService],
+    inject: [ConfigService],
     useFactory: (config: ConfigService): SequelizeModuleOptions => {
       return {
         dialect: 'postgres',
+        // uri: config.get<string>("DATABASE_URL"),
         host: config.get<string>('DB_HOST'),
         port: +config.get<string>('DB_PORT'),
         username: config.get('DB_USERNAME'),

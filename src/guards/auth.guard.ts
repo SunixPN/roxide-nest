@@ -35,6 +35,8 @@ export class AuthGuard implements CanActivate {
         const items = data_keys.map(key => key + '=' + parsedData[key])
     
         const data_check_string = items.join('\n')
+
+        console.log(typeof data_check_string, "DATA CA")
     
         function HMAC_SHA256(value: any, key: any) {
             const crypto = require('crypto');
@@ -44,8 +46,6 @@ export class AuthGuard implements CanActivate {
         function hex(bytes: any) {
             return bytes.toString('hex');
         }
-
-        console.log(parsedData)
 
         const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
 
