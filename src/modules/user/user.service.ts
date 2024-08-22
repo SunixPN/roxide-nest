@@ -82,12 +82,12 @@ export class UserService {
             SELECT position
             FROM (
                 SELECT 
-                    telegram_id, 
+                    telegramId, 
                     coins, 
                     RANK() OVER (ORDER BY coins DESC) AS position
-                FROM users
+                FROM Users
             ) AS ranked_users
-            WHERE telegram_id = :telegramId
+            WHERE telegramId = :telegramId
         `
 
     
