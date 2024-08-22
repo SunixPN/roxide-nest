@@ -85,7 +85,7 @@ export class UserService {
                     telegramId, 
                     coins, 
                     RANK() OVER (ORDER BY coins DESC) AS position
-                FROM Users
+                FROM "Users"
             ) AS ranked_users
             WHERE telegramId = :telegramId
         `
