@@ -1,11 +1,16 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { QueryTypes } from 'sequelize';
 import { Bonus } from 'src/entities/bonus.model';
 import { Farm } from 'src/entities/farm.model';
 import { Task } from 'src/entities/task.model';
 import { ICreateUser, User } from 'src/entities/user.model';
 import { UserTask } from 'src/entities/userTask.model';
 import { TelegramService } from 'src/telegram/telegram.service';
+
+interface IResult {
+    position: number
+}
 
 @Injectable()
 export class UserService {
@@ -54,10 +59,12 @@ export class UserService {
         const users = await this.userRepository.findAll({
             order: [
                 ["coins", "DESC"]
-            ]
+            ],
+
+            limit: 100
         })
 
-        const userPosition = users.findIndex(userFrom => userFrom.id === user.id) + 1
+        const userPosition = await this.userRaiting(user.telegramId)
 
         const info = await this.usersInfo(users)
 
@@ -68,6 +75,29 @@ export class UserService {
             raiting: info,
             userPosition: userPosition
         }
+    }
+
+    async userRaiting(telegramId: bigint) {
+        const positionQuery = `
+            SELECT position
+            FROM (
+                SELECT 
+                    telegram_id, 
+                    coins, 
+                    RANK() OVER (ORDER BY coins DESC) AS position
+                FROM users
+            ) AS ranked_users
+            WHERE telegram_id = :telegramId
+        `
+
+    
+
+        const [result] = await this.userRepository.sequelize.query<IResult>(positionQuery, {
+            replacements: { telegramId },
+            type: QueryTypes.SELECT
+        })
+
+        return result.position;
     }
 
     async usersInfo(users: User[]) {
