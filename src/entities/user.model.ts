@@ -5,7 +5,7 @@ import { Bonus } from './bonus.model'
 import { Task } from './task.model'
 import { UserTask } from './userTask.model'
 import { Revenues } from './revenues.model'
-import { UserServiceFactory } from 'src/modules/user/user.factory'
+import { HookReturn } from 'sequelize/types/hooks'
 
 export interface ICreateUser {
   telegramId: bigint,
@@ -43,14 +43,28 @@ export class User extends Model<User, ICreateUser> {
   tasks: Task[]
 
   @AfterUpdate
-  async afterUpdate() {
-    if (this.changed("coins")) {
-      const userService = UserServiceFactory.getUserService()
+  static async afterUpdateModel(instance: User): Promise<HookReturn> {
+    if (instance.changed("coins")) {
 
-      const previous = this.previous("coins")
-      const currentCoins = this.coins
+      const previous = instance.previous("coins")
+      const currentCoins = instance.coins
 
-      await userService.updateReferalUser(this, currentCoins - previous)
+      if (instance.referrerId) {
+
+        const ref_user = await User.findOne({
+            where: {
+                id: instance.referrerId
+            }
+        })
+
+        const revenues = await ref_user.$get("Revenues")
+
+        revenues.coins += (currentCoins - previous) * 0.01
+
+        await revenues.save()
+      }
     }
+
+    return Promise.resolve()
   }
 }

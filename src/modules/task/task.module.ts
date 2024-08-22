@@ -9,12 +9,16 @@ import { TelegramService } from 'src/telegram/telegram.service';
 import { Farm } from 'src/entities/farm.model';
 import { Bonus } from 'src/entities/bonus.model';
 import { UserService } from '../user/user.service';
+import { TelegramModule } from 'src/telegram/telegram.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   controllers: [TaskController],
-  providers: [TaskService, TelegramService, UserService],
+  providers: [TaskService],
   imports: [
-    SequelizeModule.forFeature([User, Task, UserTask, Farm, Bonus])
+    SequelizeModule.forFeature([User, Task, UserTask, Farm, Bonus]),
+    TelegramModule,
+    UserModule
   ]
 })
 export class TaskModule {}

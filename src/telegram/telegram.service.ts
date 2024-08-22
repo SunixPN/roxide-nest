@@ -15,7 +15,7 @@ export class TelegramService extends Telegraf<Context> {
     constructor(
         @InjectModel(User) private readonly userRepository: typeof User,
         @InjectModel(Revenues) private readonly revenuesRepository: typeof Revenues,
-        @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+        private readonly userService: UserService,
         private readonly configService: ConfigService
         ) { super(configService.get<string>("TELEGRAM_BOT_TOKEN")) }
 
