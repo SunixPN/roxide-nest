@@ -75,19 +75,21 @@ export class UserService {
 		const promises = []
 
 		for (const user of users) {
-			promises.push(async () => {
-                const userInfo = await this.telegramService.getUserInfo(user.telegramId)
-
-                info.push({
-                    ...userInfo,
-                    telegramId: userInfo.id,
-                    ...user.dataValues,
-                })
-            })
+			promises.push(this.infoSet(info, user))
 		}
 
         await Promise.all(promises)
 
         return info
+    }
+
+    private async infoSet(info: any, user: User) {
+        const userInfo = await this.telegramService.getUserInfo(user.telegramId)
+
+        info.push({
+            ...userInfo,
+            telegramId: userInfo.id,
+            ...user.dataValues,
+        })
     }
 }
