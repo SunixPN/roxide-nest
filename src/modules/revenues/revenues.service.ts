@@ -22,9 +22,11 @@ export class RevenuesService {
         currentDate.setDate(currentDate.getDate() + 1)
 
         revenues.next_revenues_time = currentDate
+        user.coins += revenues.coins
         revenues.coins = 0
 
         await revenues.save()
+        await user.save()
 
         return {
             status: "Ok",
