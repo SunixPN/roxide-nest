@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
 import {Start, Update, Ctx} from 'nestjs-telegraf';
@@ -13,7 +13,7 @@ export class TelegramService extends Telegraf<Context> {
 
     constructor(
         @InjectModel(User) private readonly userRepository: typeof User,
-        private readonly userService: UserService,
+        @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
         private readonly configService: ConfigService
         ) { super(configService.get<string>("TELEGRAM_BOT_TOKEN")) }
 

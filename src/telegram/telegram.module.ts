@@ -1,20 +1,18 @@
-import {Module} from '@nestjs/common';
+import {Module, forwardRef} from '@nestjs/common';
 import {TelegrafModule} from 'nestjs-telegraf';
 import {options} from '../../config/telegram.config';
 import {TelegramService} from './telegram.service';
 import {SequelizeModule} from '@nestjs/sequelize';
 import {User} from '../entities/user.model';
-import { Farm } from 'src/entities/farm.model';
-import { Bonus } from 'src/entities/bonus.model';
-import { UserService } from 'src/modules/user/user.service';
-import { Task } from 'src/entities/task.model';
-import { UserTask } from 'src/entities/userTask.model';
+import { UserModule } from 'src/modules/user/user.module';
 
 @Module({
     imports: [
         TelegrafModule.forRootAsync(options()),
-        SequelizeModule.forFeature([User, Farm, Bonus, Task, UserTask]),
+        SequelizeModule.forFeature([User]),
+        forwardRef(() => UserModule) 
     ],
-    providers: [TelegramService, UserService],
+    providers: [TelegramService],
+    exports: [TelegramService]
 })
 export class TelegramModule {}

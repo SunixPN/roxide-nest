@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Bonus } from 'src/entities/bonus.model';
 import { Farm } from 'src/entities/farm.model';
 import { Task } from 'src/entities/task.model';
 import { ICreateUser, User } from 'src/entities/user.model';
 import { UserTask } from 'src/entities/userTask.model';
+import { TelegramService } from 'src/telegram/telegram.service';
 
 @Injectable()
 export class UserService {
@@ -13,7 +14,8 @@ export class UserService {
         @InjectModel(Farm) private readonly farmRepository: typeof Farm,
         @InjectModel(Bonus) private readonly bonusRepository: typeof Bonus,
         @InjectModel(Task) private readonly taskRepository: typeof Task,
-        @InjectModel(UserTask) private readonly userTaskRepository: typeof UserTask
+        @InjectModel(UserTask) private readonly userTaskRepository: typeof UserTask,
+        @Inject(forwardRef(() => TelegramService)) private readonly telegramService: TelegramService
         ) {}
 
     async createUser(new_user: ICreateUser) {
@@ -48,14 +50,44 @@ export class UserService {
         }))
     }
 
-    async referalUserList(user: User) {
-        const referals = await user.$get("Referrals", {
-            order: [["coins", "DESC"]]
+    async usersRaiting(user: User) {
+        const users = await this.userRepository.findAll({
+            order: [
+                ["coins", "DESC"]
+            ]
         })
+
+        const userPosition = users.findIndex(userFrom => userFrom.id === user.id) + 1
+
+        const info = await this.usersInfo(users)
+
+        info.sort((a, b) => b.coins - a.coins)
 
         return {
             status: "Ok",
-            content: referals
+            raiting: info,
+            userPosition: userPosition
         }
+    }
+
+    async usersInfo(users: User[]) {
+        const info = []
+		const promises = []
+
+		for (const user of users) {
+			promises.push(async () => {
+                const userInfo = await this.telegramService.getUserInfo(user.telegramId)
+
+                info.push({
+                    ...userInfo,
+                    telegramId: userInfo.id,
+                    ...user.dataValues,
+                })
+            })
+		}
+
+        await Promise.all(promises)
+
+        return info
     }
 }

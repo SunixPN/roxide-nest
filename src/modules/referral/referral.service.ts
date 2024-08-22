@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { User } from '../../entities/user.model'
 import { TelegramService } from 'src/telegram/telegram.service'
+import { UserService } from '../user/user.service'
 
 @Injectable()
 export class ReferralService {
 	constructor(
-		private readonly telegramService: TelegramService
+		private readonly telegramService: TelegramService,
+		private readonly userService: UserService
 	) {
 	}
 
@@ -17,14 +19,7 @@ export class ReferralService {
 	async referrals(user: User) {
 		const referals = await user.$get("Referrals")
 
-		const info = []
-		const promises = []
-
-		for (const ref of referals) {
-			promises.push(this.setInfo(info, ref))
-		}
-
-		await Promise.all(promises)
+		const info = await this.userService.usersInfo(referals)
 
 		info.sort((a, b) => b.coins - a.coins)
 
@@ -33,16 +28,5 @@ export class ReferralService {
 			status: "Ok",
 			content: info
 		}
-	}
-
-	private async setInfo(info: any[], referal: User) {
-		const userInfo = await this.telegramService.getUserInfo(referal.telegramId)
-
-		info.push({
-			...userInfo,
-			telegramId: userInfo.id,
-			...referal.dataValues,
-		})
-
 	}
 }

@@ -7,9 +7,9 @@ import { User } from 'src/entities/user.model';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get("/referal-user-list")
+  @Get("/raiting")
   @UseGuards(AuthGuard)
-  referalUserList(@Req() { user }) {
-    return this.userService.referalUserList(user as User)
+  raiting(@Req() { user }) {
+    return this.userService.usersRaiting(user as User)
   }
 }
