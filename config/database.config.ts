@@ -5,6 +5,7 @@ import { Farm } from '../src/entities/farm.model'
 import { Bonus } from './../src/entities/bonus.model';
 import { Task } from 'src/entities/task.model';
 import { UserTask } from 'src/entities/userTask.model';
+import { Revenues } from 'src/entities/revenues.model';
 
 export const options = (): SequelizeModuleAsyncOptions => {
   return {
@@ -19,7 +20,7 @@ export const options = (): SequelizeModuleAsyncOptions => {
         username: config.get('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
-        models: [User, Farm, Bonus, Task, UserTask],
+        models: [User, Farm, Bonus, Task, UserTask, Revenues],
         autoLoadModels: true,
         sync: { alter: true },
       }

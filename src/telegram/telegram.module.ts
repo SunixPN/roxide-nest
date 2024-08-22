@@ -5,11 +5,12 @@ import {TelegramService} from './telegram.service';
 import {SequelizeModule} from '@nestjs/sequelize';
 import {User} from '../entities/user.model';
 import { UserModule } from 'src/modules/user/user.module';
+import { Revenues } from 'src/entities/revenues.model';
 
 @Module({
     imports: [
         TelegrafModule.forRootAsync(options()),
-        SequelizeModule.forFeature([User]),
+        SequelizeModule.forFeature([User, Revenues]),
         forwardRef(() => UserModule) 
     ],
     providers: [TelegramService],

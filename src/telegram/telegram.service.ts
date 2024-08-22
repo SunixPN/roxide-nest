@@ -2,6 +2,7 @@ import { BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
 import {Start, Update, Ctx} from 'nestjs-telegraf';
+import { Revenues } from 'src/entities/revenues.model';
 import { ICreateUser, User } from 'src/entities/user.model';
 import { UserService } from 'src/modules/user/user.service';
 import {Scenes, Telegraf} from 'telegraf';
@@ -13,6 +14,7 @@ export class TelegramService extends Telegraf<Context> {
 
     constructor(
         @InjectModel(User) private readonly userRepository: typeof User,
+        @InjectModel(Revenues) private readonly revenuesRepository: typeof Revenues,
         @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
         private readonly configService: ConfigService
         ) { super(configService.get<string>("TELEGRAM_BOT_TOKEN")) }
@@ -38,7 +40,7 @@ export class TelegramService extends Telegraf<Context> {
                         telegramId: referal_id
                     },
 
-                    include: ["Referrals"]
+                    include: ["Referrals", "Revenues"]
                 })
 
                 if (!ref_user || ref_user.Referrals.length >= 15) {
@@ -48,6 +50,19 @@ export class TelegramService extends Telegraf<Context> {
                         `
                     )
                     return
+                }
+
+                if (!ref_user.Revenues) {
+                    const currentDate = new Date()
+                    currentDate.setDate(currentDate.getDate() + 1)
+
+                    const revenues = await this.revenuesRepository.create({
+                        next_revenues_time: currentDate,
+                        userId: ref_user.id
+                    })
+
+                    await ref_user.$set("Revenues", revenues)
+                    
                 }
 
                 new_user.referrerId = ref_user.id

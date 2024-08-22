@@ -9,7 +9,7 @@ import { UserTask } from 'src/entities/userTask.model';
 import { TelegramService } from 'src/telegram/telegram.service';
 
 interface IResult {
-    position: number
+    position: string
 }
 
 @Injectable()
@@ -55,6 +55,22 @@ export class UserService {
         }))
     }
 
+    async updateReferalUser(user: User, updateCoins: number) {
+        if (user.referrerId) {
+            const ref_user = await this.userRepository.findOne({
+                where: {
+                    id: user.referrerId
+                }
+            })
+
+            const revenues = await ref_user.$get("Revenues")
+
+            revenues.coins += updateCoins * 0.01
+
+            await revenues.save()
+        }
+    }
+
     async usersRaiting(user: User) {
         const users = await this.userRepository.findAll({
             order: [
@@ -73,7 +89,7 @@ export class UserService {
         return {
             status: "Ok",
             raiting: info,
-            userPosition: userPosition
+            userPosition: +userPosition
         }
     }
 
