@@ -10,6 +10,7 @@ import { TelegramModule } from './telegram/telegram.module'
 import { BonusModule } from './modules/bonus/bonus.module';
 import { UserModule } from './modules/user/user.module';
 import { TaskModule } from './modules/task/task.module';
+import { RevenuesModule } from './modules/revenues/revenues.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { TaskModule } from './modules/task/task.module';
     TelegramModule,
     BonusModule,
     UserModule,
-    TaskModule
+    TaskModule,
+    RevenuesModule
   ],
   controllers: []
 })
