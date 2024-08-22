@@ -20,13 +20,15 @@ export class ReferralService {
 		const referals = await user.$get("Referrals")
 
 		const info = await this.userService.usersInfo(referals)
+		const revenues = await user.$get("Revenues")
 
 		info.sort((a, b) => b.coins - a.coins)
 
 
 		return {
 			status: "Ok",
-			content: info
+			content: info,
+			revenues: revenues.coins
 		}
 	}
 }
