@@ -1,6 +1,5 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
 import { ITaskCreate, Task } from 'src/entities/task.model';
 import { User } from 'src/entities/user.model';
 import { UserTask } from 'src/entities/userTask.model';
@@ -13,24 +12,13 @@ export class TaskService {
         @InjectModel(Task) private readonly taskRepository: typeof Task,
         @InjectModel(User) private readonly userRepository: typeof User,
         @InjectModel(UserTask) private readonly userTaskRepository: typeof UserTask,
-        private readonly telegramService: TelegramService
+        @Inject(forwardRef(() => TelegramService)) private readonly telegramService: TelegramService
     ) {}
 
     async createTask(task: ITaskCreate) {
         const newTask = await this.taskRepository.create({
             ...task
         })
-
-        const users = await this.userRepository.findAll()
-
-        await Promise.all(
-            users.map(async user => {
-                await this.userTaskRepository.create({
-                    user_id: user.id,
-                    task_id: newTask.id,
-                })
-            })
-        )
 
         return {
             status: "created",
@@ -44,83 +32,107 @@ export class TaskService {
             main_task_id: main_task_id
         })
 
-        const users = await this.userRepository.findAll()
-
-        await Promise.all(
-            users.map(async user => {
-                await this.userTaskRepository.create({
-                    user_id: user.id,
-                    task_id: newTask.id,
-                })
-            })
-        )
-
         return {
             status: "created",
             task: newTask
         }
     }
 
+    async deleteTask(task_id: number) {
+        const deleteTask = await this.findTask(task_id)
+
+        await deleteTask.destroy()
+    }
+
+    async updateTask(task: ITaskCreate, id: number) {
+        const updateTask = await this.findTask(id)
+
+        await updateTask.update({
+            title: task.title ?? updateTask.title,
+            description: task.description ?? updateTask.description,
+            link: task.link ?? updateTask.link,
+            channel_id: task.channel_id ?? updateTask.channel_id,
+            coins: task.coins ?? updateTask.coins
+        })
+    }
+
     async getAllTasksWithUser(user: User) {
-        const userTasks = await this.userTaskRepository.findAll({
+        const tasks = await this.taskRepository.findAll({
             where: {
-                user_id: user.id,
+                main_task_id: null
             },
 
-            include: [{
-                model: Task,
-                where: {
-                    main_task_id: null
+            include: [
+                {
+                    model: Task,
+                    as: "sub_tasks",
+                    include: [
+                        {
+                            model: UserTask,
+                            where: {
+                                user_id: user.id
+                            },
+                            required: false
+                        }
+                    ]
                 },
-                include: [
-                    {
-                        model: Task,
-                        as: "sub_tasks",
-                        include: [
-                            {
-                                model: UserTask,
-                                where: {
-                                    user_id: user.id
-                                },
-                                required: false,
-                            }
-                        ]
+                {
+                    model: UserTask,
+                    where: {
+                        user_id: user.id
                     },
-                ]
-            }],
+                    required: false
+                }
+            ],
 
             order: [
-                [ { model: Task, as: "task" }, "id", "DESC" ],
-                [ { model: Task, as: "task" }, { model: Task, as: "sub_tasks" }, "id", "DESC" ]
+                ["id", "DESC"],
+                ["sub_tasks", "id", "DESC"]
             ]
         })
 
         return {
             status: "Ok",
             content: [
-                ...userTasks.map(userTask => ({
-                    ...userTask.task.dataValues,
-                    status: userTask.task_status,
-                    sub_tasks: userTask.task.sub_tasks.map(sub_task => ({
-                        ...sub_task.dataValues,
+                ...tasks.map(task => ({
+                    ...task.dataValues,
+                    sub_tasks: task.dataValues.sub_tasks.map(sub => ({
+                        ...sub.dataValues,
                         userTasks: undefined,
-                        status: sub_task.userTasks[0].task_status
-                    }))
+                        status: sub.userTasks[0]?.task_status ?? EnumTaskStatus.PENDING
+                    })),
+                    userTasks: undefined,
+                    status: task.userTasks[0]?.task_status ?? EnumTaskStatus.PENDING
                 }))
             ]
         }
     }
 
     async getTaskWithUserById(user: User, id: number) {
-        const userTask = await this.findUserTask(user.id, id)
+        const task = await this.taskRepository.findOne({
+            where: {
+                id: id
+            },
+
+            include: [
+                {
+                    model: UserTask,
+                    where: {
+                        user_id: user.id
+                    },
+
+                    required: false
+                }
+            ]
+        })
 
         return {
-            ...userTask.task.dataValues,
-            status: userTask.task_status
+            ...task.dataValues,
+            status: task.userTasks[0]?.task_status ?? EnumTaskStatus.PENDING
         }
     }
 
-    private async findTask(id: number) {
+    async findTask(id: number) {
         const task = await this.taskRepository.findByPk(id)
 
         if (!task) {
@@ -130,7 +142,7 @@ export class TaskService {
         return task
     }
 
-    private async findUserTask(user_id: number, task_id: number) {
+    private async findUserTask(user_id: number, task_id: number, no_check: boolean = false) {
         const userTask = await this.userTaskRepository.findOne({
             where: {
                 user_id: user_id,
@@ -138,7 +150,7 @@ export class TaskService {
             }
         })
 
-        if (!userTask) {
+        if (!userTask && !no_check) {
             throw new BadRequestException("No task by this user was found")
         }
 
@@ -148,16 +160,26 @@ export class TaskService {
     async startTask(user: User, id: number) {
         const task = await this.findTask(id)
 
-        const userTask = await this.findUserTask(user.id, task.id)
+        const userTaskFind = await this.findUserTask(user.id, task.id, true)
 
-        if (userTask.task_status !== EnumTaskStatus.PENDING) {
+        if (userTaskFind) {
             throw new BadRequestException("You can not start this task")
         }
 
-        if (task.main_task_id) {
-            const userMainTask = await this.findUserTask(user.id, task.main_task_id)
+        const userTask = await this.userTaskRepository.create({
+            task_id: id,
+            user_id: user.id
+        })
 
-            if (userMainTask.task_status !== EnumTaskStatus.IN_PROGRESS) {
+        if (task.main_task_id) {
+            const userMainTaskFind = await this.findUserTask(user.id, task.main_task_id, true)
+
+            if (!userMainTaskFind) {
+                const userMainTask = await this.userTaskRepository.create({
+                    task_id: task.main_task_id,
+                    user_id: user.id,
+                })
+
                 userMainTask.task_status = EnumTaskStatus.IN_PROGRESS
 
                 await userMainTask.save()

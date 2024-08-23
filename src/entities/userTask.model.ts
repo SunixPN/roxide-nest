@@ -16,7 +16,7 @@ export class UserTask extends Model<UserTask, IUserTaskCreate> {
   user_id: number
 
   @ForeignKey(() => Task)
-  @Column({ allowNull: false, type: INTEGER })
+  @Column({ allowNull: false, type: INTEGER, onDelete: "cascade", onUpdate: "cascade" })
   task_id: number
 
   @Column({ allowNull: false, type: STRING, defaultValue: "pending" })

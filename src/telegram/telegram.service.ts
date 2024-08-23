@@ -1,11 +1,13 @@
-import { BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
-import {Start, Update, Ctx} from 'nestjs-telegraf';
+import {Start, Update, Ctx, Command, Hears, On} from 'nestjs-telegraf';
 import { Revenues } from 'src/entities/revenues.model';
 import { ICreateUser, User } from 'src/entities/user.model';
 import { UserService } from 'src/modules/user/user.service';
-import {Scenes, Telegraf} from 'telegraf';
+import { Scenes, Telegraf } from 'telegraf';
+import { actionButtons } from './bot.buttons';
+import { EnumButtons } from 'src/enums/buttons.enum';
 
 type Context = Scenes.SceneContext
 
@@ -16,8 +18,10 @@ export class TelegramService extends Telegraf<Context> {
         @InjectModel(User) private readonly userRepository: typeof User,
         @InjectModel(Revenues) private readonly revenuesRepository: typeof Revenues,
         private readonly userService: UserService,
-        private readonly configService: ConfigService
-        ) { super(configService.get<string>("TELEGRAM_BOT_TOKEN")) }
+        private readonly configService: ConfigService,
+        ) { 
+            super(configService.get<string>("TELEGRAM_BOT_TOKEN")) 
+        }
 
     @Start()
     async index(@Ctx() ctx: Context) {
@@ -76,6 +80,36 @@ export class TelegramService extends Telegraf<Context> {
             <b>Привет, ${ctx.from.username}</b>\nНачнём игру ?
             `
         )
+    }
+
+    @Command("admin")
+    async admin(@Ctx() ctx: Context) {
+        await ctx.reply("Выберите действие", actionButtons())
+    }
+
+    @Hears(EnumButtons.CREATE_TASK)
+    async create_task(@Ctx() ctx: Context) {
+        ctx.scene.enter("create-task") 
+    } 
+
+    @Hears(EnumButtons.CREATE_SUB_TASK)
+    async createSubTask(@Ctx() ctx: Context) {
+        ctx.scene.enter("create-sub") 
+    }
+
+    @Hears(EnumButtons.DELETE_TASK)
+    async deleteTask(@Ctx() ctx: Context) {
+        ctx.scene.enter("delete-task") 
+    }
+
+    @Hears(EnumButtons.UPDATE_TASK)
+    async updateTask(@Ctx() ctx: Context) {
+        ctx.scene.enter("update-task") 
+    }
+
+    @On("text")
+    async hello(@Ctx() ctx: Context) {
+        ctx.reply("Привет! Для начала работы с ботом введите команду /start")
     }
 
     async getUserInfo(telegram_id: bigint) {
