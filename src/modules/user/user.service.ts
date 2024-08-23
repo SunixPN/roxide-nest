@@ -123,5 +123,11 @@ export class UserService {
                 ...user.dataValues,
             })
         }
+
+        else {
+            info.push({
+                ...user.dataValues
+            })
+        }
     }
 }
