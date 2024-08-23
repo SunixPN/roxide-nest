@@ -1,4 +1,4 @@
-import { Column, Table, Model, HasOne, ForeignKey, HasMany, BelongsTo, BelongsToMany, AfterUpdate } from 'sequelize-typescript'
+import { Column, Table, Model, HasOne, ForeignKey, HasMany, BelongsTo, BelongsToMany, AfterUpdate, DataType } from 'sequelize-typescript'
 import { BIGINT, FLOAT, INTEGER } from 'sequelize'
 import { Farm } from './farm.model'
 import { Bonus } from './bonus.model'
@@ -6,6 +6,7 @@ import { Task } from './task.model'
 import { UserTask } from './userTask.model'
 import { Revenues } from './revenues.model'
 import { HookReturn } from 'sequelize/types/hooks'
+import { EnumRoles } from 'src/enums/roles.enum'
 
 export interface ICreateUser {
   telegramId: bigint,
@@ -23,6 +24,9 @@ export class User extends Model<User, ICreateUser> {
 
   @Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
   coins: number
+
+  @Column({ type: DataType.ENUM("admin", "user"), allowNull: false, defaultValue: "user" })
+  role: EnumRoles
 
   @HasOne(() => Farm)
   Farm: Farm

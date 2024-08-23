@@ -22,7 +22,7 @@ export const options = (): SequelizeModuleAsyncOptions => {
         database: config.get<string>('DB_DATABASE'),
         models: [User, Farm, Bonus, Task, UserTask, Revenues],
         autoLoadModels: true,
-        // sync: { alter: true },
+        sync: { alter: true },
       }
     }
   }

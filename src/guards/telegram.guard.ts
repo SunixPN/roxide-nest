@@ -1,23 +1,30 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/sequelize";
+import { User } from "src/entities/user.model";
+import { EnumRoles } from "src/enums/roles.enum";
 import { Scenes } from "telegraf";
 
 type Context = Scenes.SceneContext
 
 @Injectable()
 export class TelegramGuard implements CanActivate {
+    constructor(@InjectModel(User) private readonly userRepository: typeof User) {}
+
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const ctx = context.switchToHttp().getRequest<Context>();
-        const admins = [1213507635]
+        const userTg = ctx.from
 
-        const user = ctx.from
+        const user = await this.userRepository.findOne({
+            where: {
+                telegramId: userTg.id
+            }
+        })
 
-        if (!user) {
-            await ctx.reply("У вас нет доступа к этой команде!")
+
+        if (!user || user.role !== EnumRoles.ADMIN) {
             return false
         }
 
-        if (admins.includes(user.id)) {
-            return true
-        }
+        return true
     }
 }
