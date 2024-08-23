@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
 import {Start, Update, Ctx, Command, Hears, On} from 'nestjs-telegraf';
@@ -8,6 +8,7 @@ import { UserService } from 'src/modules/user/user.service';
 import { Scenes, Telegraf } from 'telegraf';
 import { actionButtons } from './bot.buttons';
 import { EnumButtons } from 'src/enums/buttons.enum';
+import { TelegramGuard } from 'src/guards/telegram.guard';
 
 type Context = Scenes.SceneContext
 
@@ -83,26 +84,31 @@ export class TelegramService extends Telegraf<Context> {
     }
 
     @Command("admin")
+    @UseGuards(TelegramGuard)
     async admin(@Ctx() ctx: Context) {
         await ctx.reply("Выберите действие", actionButtons())
     }
 
     @Hears(EnumButtons.CREATE_TASK)
+    @UseGuards(TelegramGuard)
     async create_task(@Ctx() ctx: Context) {
         ctx.scene.enter("create-task") 
     } 
 
     @Hears(EnumButtons.CREATE_SUB_TASK)
+    @UseGuards(TelegramGuard)
     async createSubTask(@Ctx() ctx: Context) {
         ctx.scene.enter("create-sub") 
     }
 
     @Hears(EnumButtons.DELETE_TASK)
+    @UseGuards(TelegramGuard)
     async deleteTask(@Ctx() ctx: Context) {
         ctx.scene.enter("delete-task") 
     }
 
     @Hears(EnumButtons.UPDATE_TASK)
+    @UseGuards(TelegramGuard)
     async updateTask(@Ctx() ctx: Context) {
         ctx.scene.enter("update-task") 
     }
