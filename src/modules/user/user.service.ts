@@ -101,20 +101,6 @@ export class UserService {
     }
 
     async usersInfo(users: User[]) {
-        await this.telegramService.getUserInfo(BigInt(938460355))
-        console.log("DONE 1")
-        // await this.telegramService.getUserInfo(BigInt(837087516))
-        // console.log("DONE 2")
-        await this.telegramService.getUserInfo(BigInt(1081626720))
-        console.log("DONE 3")
-        // await this.telegramService.getUserInfo(BigInt(494274334))
-        // console.log("DONE 4")
-        await this.telegramService.getUserInfo(BigInt(1944733760))
-        console.log("DONE 5")
-        await this.telegramService.getUserInfo(BigInt(1213507635))
-        console.log("DONE 6")
-        // await this.telegramService.getUserInfo(BigInt(812517087))
-        console.log("DONE")
         const info = []
 		const promises = []
 
@@ -130,10 +116,12 @@ export class UserService {
     private async infoSet(info: any, user: User) {
         const userInfo = await this.telegramService.getUserInfo(user.telegramId)
 
-        info.push({
-            ...userInfo,
-            telegramId: userInfo.id,
-            ...user.dataValues,
-        })
+        if (userInfo?.id) {
+            info.push({
+                ...userInfo,
+                telegramId: userInfo.id,
+                ...user.dataValues,
+            })
+        }
     }
 }

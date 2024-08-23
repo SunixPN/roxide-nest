@@ -113,24 +113,30 @@ export class TelegramService extends Telegraf<Context> {
     }
 
     async getUserInfo(telegram_id: bigint) {
-        const userInfo = await this.telegram.getChat(telegram_id.toString())
-        const photo = await this.telegram.getUserProfilePhotos(Number(telegram_id))
-        let fileUrl: string
-
-        if (photo.total_count > 0) {
-            const lastPhotoSet = photo.photos[0]
-
-            const lastPhoto = lastPhotoSet[lastPhotoSet.length - 1]
-
-            const file = await this.telegram.getFile(lastPhoto.file_id)
-            const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
-
-            fileUrl = `https://api.telegram.org/file/bot${token}/${file.file_path}`
+        try {
+            const userInfo = await this.telegram.getChat(telegram_id.toString())
+            const photo = await this.telegram.getUserProfilePhotos(Number(telegram_id))
+            let fileUrl: string
+    
+            if (photo.total_count > 0) {
+                const lastPhotoSet = photo.photos[0]
+    
+                const lastPhoto = lastPhotoSet[lastPhotoSet.length - 1]
+    
+                const file = await this.telegram.getFile(lastPhoto.file_id)
+                const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
+    
+                fileUrl = `https://api.telegram.org/file/bot${token}/${file.file_path}`
+            }
+    
+            return  {
+                ...userInfo,
+                photo: fileUrl
+            }
         }
 
-        return  {
-            ...userInfo,
-            photo: fileUrl
+        catch (e) {
+            console.log(e.message)
         }
     }
 
