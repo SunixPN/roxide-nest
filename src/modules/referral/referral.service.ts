@@ -28,7 +28,7 @@ export class ReferralService {
 		return {
 			status: "Ok",
 			content: info,
-			revenues: revenues.coins
+			revenues: revenues?.coins ?? 0
 		}
 	}
 }
