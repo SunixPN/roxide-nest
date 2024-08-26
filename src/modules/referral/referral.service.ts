@@ -24,11 +24,11 @@ export class ReferralService {
 
 		info.sort((a, b) => b.coins - a.coins)
 
-
 		return {
 			status: "Ok",
 			content: info,
-			revenues: revenues?.coins ?? 0
+			revenues: revenues?.coins ?? 0,
+			next_revenues_time: revenues?.next_revenues_time ?? null
 		}
 	}
 }
