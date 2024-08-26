@@ -43,6 +43,9 @@ export class User extends Model<User, ICreateUser> {
   @HasMany(() => User, 'referrerId')
   Referrals: User[]
 
+  @Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
+  day_revenues: number
+
   @BelongsToMany(() => Task, () => UserTask)
   tasks: Task[]
 
@@ -62,10 +65,15 @@ export class User extends Model<User, ICreateUser> {
         })
 
         const revenues = await ref_user.$get("Revenues")
+        
+        if ( !(revenues.next_revenues_time.getTime() <= new Date().getTime()) ) {
+            revenues.coins += (currentCoins - previous) * 0.05
+            instance.day_revenues += (currentCoins - previous) * 0.05
+  
+            await revenues.save()
+            await instance.save()
+        }
 
-        revenues.coins += (currentCoins - previous) * 0.01
-
-        await revenues.save()
       }
     }
 
