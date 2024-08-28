@@ -18,28 +18,23 @@ export class DeleteScene {
 
     @WizardStep(1)
     async step1(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Введите ID задачи которую хотите удалить: ")
+        await ctx.reply("Введите название задачи которую хотите удалить: ")
         ctx.wizard.next()
     }
 
     @WizardStep(2)
     async step2(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        if (isNaN(+message)) {
-            await ctx.reply("Неверный формат данных! Повторите попытку: ")
-            return
+        try {
+            const task = await this.taskService.findTaskByName(message)
+            await this.taskService.deleteTask(task.id)
+            
+            ctx.reply("Задача успешно удалена!")
+            ctx.scene.leave()
         }
 
-        else {
-            try {
-                await this.taskService.deleteTask(+message)
-                ctx.reply("Задача успешно удалена!")
-                ctx.scene.leave()
-            }
-
-            catch {
-                await ctx.reply("Данной задачи не было найдено, повторите попытку: ")
-                return
-            }
+        catch {
+            await ctx.reply("Данной задачи не было найдено, повторите попытку: ")
+            return
         }
     }
 }

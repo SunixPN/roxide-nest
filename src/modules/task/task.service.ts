@@ -16,6 +16,16 @@ export class TaskService {
     ) {}
 
     async createTask(task: ITaskCreate) {
+        const taskWithTitle = await this.taskRepository.findOne({
+            where: {
+                title: task.title
+            }
+        })
+
+        if (taskWithTitle) {
+            throw new BadRequestException("Task with current title is Exist!")
+        }
+        
         const newTask = await this.taskRepository.create({
             ...task
         })
@@ -24,6 +34,20 @@ export class TaskService {
             status: "created",
             task: newTask
         }
+    }
+
+    async findTaskByName(title: string, dont_check: boolean = false) {
+        const task = await this.taskRepository.findOne({
+            where: {
+                title: title
+            }
+        })
+
+        if (!task && !dont_check) {
+            throw new BadRequestException("Task not found")
+        }
+
+        return task
     }
 
     async createSubTask(task: ITaskCreate, main_task_id: number) {

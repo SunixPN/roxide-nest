@@ -34,6 +34,13 @@ export class CreateTaskScene {
 
     @WizardStep(2)
     async step2(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        const task = await this.taskService.findTaskByName(message, true)
+
+        if (task) {
+            await ctx.reply("Задача с данным названием уже существует, повторите попытку: ")
+            return
+        }
+
         ctx.wizard.state.title = message
         await ctx.reply("Введите описание задачи\nЛибо введите команду /empty чтобы пропустить этот шаг: ")
         ctx.wizard.next()
@@ -117,7 +124,7 @@ export class CreateTaskScene {
     @WizardStep(5)
     @Action("INNER")
     async step5_inner(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Введите новый ID телеграмм канала (Убедитесь, что бот является администратором этого канала): ")
+        ctx.reply("Введите ID телеграмм канала (Убедитесь, что бот является администратором этого канала): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }

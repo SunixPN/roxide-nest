@@ -19,30 +19,23 @@ export class UpdateTaskScene {
 
     @WizardStep(1)
     async step1(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Введите ID задачи которую хотите редактировать: ")
+        await ctx.reply("Введите название задачи которую хотите редактировать: ")
         ctx.wizard.next()
     }
 
     @WizardStep(2)
     async step2(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        if (isNaN(+message)) {
-            await ctx.reply("Неверный формат данных! Повторите попытку: ")
-            return
+        try {
+            const task = await this.taskService.findTaskByName(message)
+
+            ctx.wizard.state.main_task_id = task.id
+            await ctx.reply("Введите новое название задачи\nЛибо введите команду /empty чтобы пропустить этот шаг: ")
+            ctx.wizard.next()
         }
 
-        else {
-            try {
-                await this.taskService.findTask(+message)
-
-                ctx.wizard.state.main_task_id = +message
-                await ctx.reply("Введите новое название задачи\nЛибо введите команду /empty чтобы пропустить этот шаг: ")
-                ctx.wizard.next()
-            }
-
-            catch {
-                await ctx.reply("Данной задачи не было найдено, повторите попытку: ")
-                return
-            }
+        catch {
+            await ctx.reply("Данной задачи не было найдено, повторите попытку: ")
+            return
         }
     }
 
@@ -54,6 +47,12 @@ export class UpdateTaskScene {
         }
 
         else {
+            const task = await this.taskService.findTaskByName(message, true)
+
+            if (task) {
+                await ctx.reply("Задача с данным названием уже существует, повторите попытку: ")
+                return
+            }
             ctx.wizard.state.title = message
             await ctx.reply("Введите новое описание задачи\nЛибо введите команду /empty чтобы пропустить этот шаг: ")
             ctx.wizard.next()

@@ -19,31 +19,25 @@ export class CreateSubScene {
 
     @WizardStep(1)
     async step1(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Введите ID главной задачи: ")
+        await ctx.reply("Введите название главной задачи: ")
         ctx.wizard.next()
     }
 
     @WizardStep(2)
     async step2(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        if (isNaN(+message)) {
-            await ctx.reply("Неверный формат данных! Повторите попытку: ")
+        try {
+            const task = await this.taskService.findTaskByName(message)
+
+            ctx.wizard.state.main_task_id = task.id
+            await ctx.reply("Введите название задачи: ")
+            ctx.wizard.next()
+        }
+
+        catch {
+            await ctx.reply("Данной задачи не было найдено, повторите попытку: ")
             return
         }
 
-        else {
-            try {
-                await this.taskService.findTask(+message)
-
-                ctx.wizard.state.main_task_id = +message
-                await ctx.reply("Введите название задачи: ")
-                ctx.wizard.next()
-            }
-
-            catch {
-                await ctx.reply("Данной задачи не было найдено, повторите попытку: ")
-                return
-            }
-        }
     }
 
     @WizardStep(3)
