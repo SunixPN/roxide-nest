@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { User } from "src/entities/user.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { ConfigService } from "@nestjs/config";
+import * as queryString from "querystring";
 
 export interface IRequest extends Request {
     user: User
@@ -24,13 +25,8 @@ export class AuthGuard implements CanActivate {
 
         const authDataSplit = authHeader.split(" ")[1]
 
-        console.log(authHeader)
-        console.log(authDataSplit)
-
-        const parsedData = JSON.parse(authDataSplit);
-
-        const buffer = Buffer.from(parsedData.user, 'latin1')
-        parsedData.user = buffer.toString('utf-8')
+        console.log(decodeURIComponent(authDataSplit))
+        const parsedData = queryString.parse(decodeURIComponent(authDataSplit)) as any;
 
         const hash = parsedData.hash
         const data_keys = Object.keys(parsedData).filter(v => v !== 'hash').sort()
@@ -38,8 +34,6 @@ export class AuthGuard implements CanActivate {
         const items = data_keys.map(key => key + '=' + parsedData[key])
     
         const data_check_string = items.join('\n')
-
-        console.log(typeof data_check_string, "DATA CA")
     
         function HMAC_SHA256(value: any, key: any) {
             const crypto = require('crypto');
