@@ -42,9 +42,19 @@ export class CreateSubScene {
 
     @WizardStep(3)
     async step3(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        ctx.wizard.state.title = message
-        await ctx.reply("Введите описание задачи\nЛибо введите команду /empty чтобы пропустить этот шаг: ")
-        ctx.wizard.next()
+        const task = await this.taskService.findTaskByName(message, true)
+
+        if (task) {
+            await ctx.reply("Задача с данным названием уже существует, повторите попытку: ")
+            return
+        }
+
+        else {
+            ctx.wizard.state.title = message
+            await ctx.reply("Введите описание задачи\nЛибо введите команду /empty чтобы пропустить этот шаг: ")
+            ctx.wizard.next()
+        }
+
     }
 
     @WizardStep(4)
