@@ -14,15 +14,15 @@ export const options = (): SequelizeModuleAsyncOptions => {
     useFactory: (config: ConfigService): SequelizeModuleOptions => {
       return {
         dialect: 'postgres',
-        uri: config.get<string>("DATABASE_URL"),
+        // uri: config.get<string>("DATABASE_URL"),
         host: config.get<string>('DB_HOST'),
         port: +config.get<string>('DB_PORT'),
         username: config.get('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         models: [User, Farm, Bonus, Task, UserTask, Revenues],
-        // autoLoadModels: true,
-        // sync: { alter: true },
+        autoLoadModels: true,
+        sync: { alter: true },
       }
     }
   }
