@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { User } from "src/entities/user.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { ConfigService } from "@nestjs/config";
-import * as queryString from "querystring";
+import * as crypto from "crypto"
 
 export interface IRequest extends Request {
     user: User
@@ -25,56 +25,34 @@ export class AuthGuard implements CanActivate {
 
         const authDataSplit = authHeader.split(" ")[1]
 
-        const hh = "edadd39d6bf3f7a460e364342d1fe81ef06b641f659ec4f93979cfb2bea1cb22"
-
-        console.log(decodeURIComponent(authDataSplit))
-
-        function parse(inputString: string) {
-            const regex = /([^&=]+)=([^&]*)/g;
-
-            const resultObj = {};
-            let match;
-
-            while ((match = regex.exec(inputString)) !== null) {
-                const [ , key, value ] = match;
-                resultObj[key] = decodeURIComponent(value);
-            }
-
-            return resultObj
-        }
-
-        const parsedData = parse(decodeURIComponent(authDataSplit)) as any
-
-        const hash = parsedData.hash
-        const data_keys = Object.keys(parsedData).filter(v => v !== 'hash').sort()
-    
-        const items = data_keys.map(key => key + '=' + parsedData[key])
-    
-        const data_check_string = items.join('\n')
-    
-        function HMAC_SHA256(value: any, key: any) {
-            const crypto = require('crypto');
-            return crypto.createHmac('sha256', key).update(value).digest()
-        }
-    
-        function hex(bytes: any) {
-            return bytes.toString('hex');
-        }
-
         const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
 
-        const secret_key = HMAC_SHA256(token, 'WebAppData')
-        const hashGenerate = hex(HMAC_SHA256(data_check_string, secret_key))
+        const urlParams: URLSearchParams = new URLSearchParams(authDataSplit)
+        const hash = urlParams.get("hash")
 
-        console.log(parsedData, hashGenerate, hash)
-    
-        if (hashGenerate !== hash) {
+        urlParams.delete("hash")
+        urlParams.sort()
+
+        let dataCheckString = ""
+
+        for (const [key, value] of urlParams.entries()) {
+            dataCheckString += `${key}=${value}\n`
+        }
+
+        dataCheckString = dataCheckString.slice(0, -1)
+
+        const secret = crypto.createHmac("sha256", "WebAppData").update(token)
+        const calculatedHash = crypto.createHmac("sha256", secret.digest()).update(dataCheckString).digest("hex")
+
+        console.log(urlParams, calculatedHash, hash)
+
+        if (calculatedHash !== hash) {
             throw new UnauthorizedException("No valid telegram data")
         }
 
         const user = await this.userRepository.findOne({
             where: {
-                telegramId: JSON.parse(parsedData.user).id
+                telegramId: JSON.parse(urlParams.get("user")).id
             }
         })
 
