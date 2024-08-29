@@ -51,10 +51,12 @@ export class User extends Model<User, ICreateUser> {
 
   @AfterUpdate
   static async afterUpdateModel(instance: User): Promise<HookReturn> {
-    if (instance.changed("coins")) {
+    if (instance.changed("coins") && !instance.changed("day_revenues")) {
 
       const previous = instance.previous("coins")
       const currentCoins = instance.coins
+
+      console.log(instance, "INSTANCE")
 
       if (instance.referrerId) {
 
