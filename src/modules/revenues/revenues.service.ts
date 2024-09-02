@@ -18,6 +18,13 @@ export class RevenuesService {
             throw new BadRequestException("You can not claim revenues")
         }
 
+        const referalsList = await user.$get("Referrals")
+
+        await Promise.all(referalsList.map(async ref => {
+            ref.day_revenues = 0
+            await ref.save()
+        }))
+
         const currentDate = new Date()
         currentDate.setDate(currentDate.getDate() + 1)
 

@@ -64,15 +64,20 @@ export class UserService {
             limit: 100
         })
 
+        console.log(users.map(user => user.dataValues))
+
         const userPosition = await this.userRaiting(user.telegramId)
 
         const info = await this.usersInfo(users)
 
-        info.sort((a, b) => b.coins - a.coins)
+        const returnInfo = users.map(user => ({
+            ...user.dataValues,
+            ...info.find(inf => inf.id === user.id)
+        }))
 
         return {
             status: "Ok",
-            raiting: info,
+            raiting: returnInfo,
             userPosition: +userPosition
         }
     }

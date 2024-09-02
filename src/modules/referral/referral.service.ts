@@ -17,16 +17,24 @@ export class ReferralService {
 	}
 
 	async referrals(user: User) {
-		const referals = await user.$get("Referrals")
+		const referals = await user.$get("Referrals", {
+			order: [
+                ["coins", "DESC"]
+            ]
+		})
 
 		const info = await this.userService.usersInfo(referals)
-		const revenues = await user.$get("Revenues")
 
-		info.sort((a, b) => b.coins - a.coins)
+		const returnInfo = referals.map(user => ({
+            ...user.dataValues,
+            ...info.find(inf => inf.id === user.id)
+        }))
+
+		const revenues = await user.$get("Revenues")
 
 		return {
 			status: "Ok",
-			content: info,
+			content: returnInfo,
 			revenues: revenues?.coins ?? 0,
 			next_revenues_time: revenues?.next_revenues_time ?? null
 		}
