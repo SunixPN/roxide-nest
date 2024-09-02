@@ -5,10 +5,11 @@ import {Start, Update, Ctx, Command, Hears, On} from 'nestjs-telegraf';
 import { Revenues } from 'src/entities/revenues.model';
 import { ICreateUser, User } from 'src/entities/user.model';
 import { UserService } from 'src/modules/user/user.service';
-import { Scenes, Telegraf } from 'telegraf';
+import { Markup, Scenes, Telegraf } from 'telegraf';
 import { actionButtons } from './bot.buttons';
 import { EnumButtons } from 'src/enums/buttons.enum';
 import { TelegramGuard } from 'src/guards/telegram.guard';
+import { LinksEnum } from 'src/enums/links.enum';
 
 type Context = Scenes.SceneContext
 
@@ -26,6 +27,7 @@ export class TelegramService extends Telegraf<Context> {
 
     @Start()
     async index(@Ctx() ctx: Context) {
+        console.log(ctx.from.id)
         const candidate = await this.userRepository.findOne({
             where: {
                 telegramId: ctx.from.id
@@ -49,11 +51,11 @@ export class TelegramService extends Telegraf<Context> {
                 })
 
                 if (!ref_user || ref_user.Referrals.length >= 15) {
-                    ctx.replyWithHTML(
-                        `
-                        Ищите другого реферального партнёра!
-                        `
-                    )
+                    ctx.reply(`Hi, @${ctx.from.username}! This invite link doesn't work, find another one and try again`, Markup.inlineKeyboard(
+                        [
+                            Markup.button.url("Join the community!", LinksEnum.CHANNEL_URL),
+                        ]
+                    ))
                     return
                 }
 
@@ -73,20 +75,34 @@ export class TelegramService extends Telegraf<Context> {
                 new_user.referrerId = ref_user.id
             }
 
+            else {
+                ctx.reply(`Hi, @${ctx.from.username}! First, find the invite link for yourself`, Markup.inlineKeyboard(
+                    [
+                        Markup.button.url("Join the community!", LinksEnum.CHANNEL_URL),
+                    ]
+                ))
+
+                return
+            }
+
             await this.userService.createUser(new_user)
         }
 
-        ctx.replyWithHTML(
-            `
-            <b>Привет, ${ctx.from.username}</b>\nНачнём игру ?
-            `
-        )
+        ctx.reply(`Hi, @${ctx.from.username}! Welcome to BUX!`, Markup.inlineKeyboard(
+            [
+                Markup.button.webApp("GO!", LinksEnum.TELEGRAM_MINI_APP_URL),
+                Markup.button.url("Join the community!", LinksEnum.CHANNEL_URL),
+            ],
+            {
+                columns: 1
+            }
+        ))
     }
 
     @Command("admin")
     @UseGuards(TelegramGuard)
     async admin(@Ctx() ctx: Context) {
-        await ctx.reply("Выберите действие", actionButtons())
+        await ctx.reply("Select an action", actionButtons())
     }
 
     @Hears(EnumButtons.CREATE_TASK)
@@ -115,7 +131,7 @@ export class TelegramService extends Telegraf<Context> {
 
     @On("text")
     async hello(@Ctx() ctx: Context) {
-        ctx.reply("Привет! Для начала работы с ботом введите команду /start")
+        ctx.reply("Hi! To start working with the bot, enter the /start command")
     }
 
     async getUserInfo(telegram_id: bigint) {

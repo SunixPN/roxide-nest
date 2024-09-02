@@ -22,13 +22,13 @@ export class CreateTaskScene {
 
     @Hears(EnumButtons.BACK)
     async back(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Выберите действие: ")
+        await ctx.reply("Select an action: ")
         ctx.scene.leave() 
     }
 
     @WizardStep(1)
     async step1(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Введите название задачи: ")
+        await ctx.reply("Enter the name of the task: ")
         ctx.wizard.next()
     }
 
@@ -37,25 +37,25 @@ export class CreateTaskScene {
         const task = await this.taskService.findTaskByName(message, true)
 
         if (task) {
-            await ctx.reply("Задача с данным названием уже существует, повторите попытку: ")
+            await ctx.reply("A task with this name already exists, try again: ")
             return
         }
 
         ctx.wizard.state.title = message
-        await ctx.reply("Введите описание задачи\nЛибо введите команду /empty чтобы пропустить этот шаг: ")
+        await ctx.reply("Enter a description of the task\nOr type /empty to skip this step: ")
         ctx.wizard.next()
     }
 
     @WizardStep(3)
     async step3(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
-            await ctx.reply("Введите награду за данную задачу: ")
+            await ctx.reply("Enter the reward for this task: ")
             ctx.wizard.next()
         }
 
         else {
             ctx.wizard.state.description = message
-            await ctx.reply("Введите награду за данную задачу: ")
+            await ctx.reply("Enter the reward for this task: ")
     
             ctx.wizard.next()
         }
@@ -64,16 +64,16 @@ export class CreateTaskScene {
     @WizardStep(4)
     async step4(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (isNaN(+message)) {
-            await ctx.reply("Неверный формат данных! Повторите попытку")
+            await ctx.reply("Incorrect data format! Try again")
             return
         }
 
         else {
             ctx.wizard.state.coins = +message
-            await ctx.reply("Выберите тип ссылки\nЛибо введите команду /empty чтобы пропустить этот шаг: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the link type/nOr type /empty to skip this step: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Ссылка на внешние ресурсы", "OUTER"),
-                    Markup.button.callback("Ссылка на телеграм канал", "INNER"),
+                    Markup.button.callback("Link to external resources", "OUTER"),
+                    Markup.button.callback("Link to telegram channel", "INNER"),
                 ]
             ))
             ctx.wizard.next()
@@ -97,15 +97,15 @@ export class CreateTaskScene {
                 channel_id: state.channel_id,
                 main_task_id: null
             })
-            await ctx.reply("Задача успешно создана !")
+            await ctx.reply("The task has been successfully created !")
             ctx.scene.leave()
         }
 
         else {
-            await ctx.reply("Если хотите пропустить данный шаг, введите команду /empty, либо выберите тип ссылки: ", Markup.inlineKeyboard(
+            await ctx.reply("If you want to skip this step, enter the /empty command, or select the link type: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Ссылка на внешние ресурсы", "OUTER"),
-                    Markup.button.callback("Ссылка на телеграм канал", "INNER"),
+                    Markup.button.callback("Link to external resources", "OUTER"),
+                    Markup.button.callback("Link to telegram channel", "INNER"),
                 ]
             ))
             return
@@ -116,7 +116,7 @@ export class CreateTaskScene {
     @WizardStep(5)
     @Action("OUTER")
     async step5_out(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Введите ссылку: ")
+        ctx.reply("Enter link: ")
         ctx.wizard.state.link_type = "OUTER"
         ctx.wizard.next()
     }
@@ -124,7 +124,7 @@ export class CreateTaskScene {
     @WizardStep(5)
     @Action("INNER")
     async step5_inner(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Введите ID телеграмм канала (Убедитесь, что бот является администратором этого канала): ")
+        ctx.reply("Enter the telegram channel ID (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
@@ -136,7 +136,7 @@ export class CreateTaskScene {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
 
                 if (chatMember.status !== "administrator") {
-                    await ctx.reply("Проверьте является ли бот админом данного канала и повторите попытку: ")
+                    await ctx.reply("Check if the bot is the admin of this channel and try again: ")
                     return
                 }
 
@@ -146,7 +146,7 @@ export class CreateTaskScene {
             }
 
             catch {
-                await ctx.reply("Проверьте является ли бот админом данного канала и повторите попытку: ")
+                await ctx.reply("Check if the bot is the admin of this channel and try again: ")
                 return
             }
         }
@@ -162,7 +162,7 @@ export class CreateTaskScene {
             )
 
             if (!urlPattern.test(message)) {
-                await ctx.reply("Не верный формат URL!")
+                await ctx.reply("Incorrect URL format! Try again: ")
                 return
             }
 
@@ -179,7 +179,7 @@ export class CreateTaskScene {
             channel_id: state.channel_id,
             main_task_id: null
         })
-        await ctx.reply("Задача успешно создана !")
+        await ctx.reply("The task has been successfully created !")
         ctx.scene.leave()
     }
 

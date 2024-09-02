@@ -12,13 +12,13 @@ export class DeleteScene {
 
     @Hears(EnumButtons.BACK)
     async back(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Выберите действие: ")
+        await ctx.reply("Select an action: ")
         ctx.scene.leave() 
     }
 
     @WizardStep(1)
     async step1(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Введите название задачи которую хотите удалить: ")
+        await ctx.reply("Enter the name of the task you want to delete: ")
         ctx.wizard.next()
     }
 
@@ -28,12 +28,12 @@ export class DeleteScene {
             const task = await this.taskService.findTaskByName(message)
             await this.taskService.deleteTask(task.id)
             
-            ctx.reply("Задача успешно удалена!")
+            ctx.reply("The task has been successfully deleted !")
             ctx.scene.leave()
         }
 
         catch {
-            await ctx.reply("Данной задачи не было найдено, повторите попытку: ")
+            await ctx.reply("This task was not found, please try again: ")
             return
         }
     }

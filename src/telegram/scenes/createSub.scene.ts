@@ -13,13 +13,13 @@ export class CreateSubScene {
 
     @Hears(EnumButtons.BACK)
     async back(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Выберите действие: ")
+        await ctx.reply("Select an action: ")
         ctx.scene.leave() 
     }
 
     @WizardStep(1)
     async step1(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Введите название главной задачи: ")
+        await ctx.reply("Enter the name of the main task: ")
         ctx.wizard.next()
     }
 
@@ -29,12 +29,12 @@ export class CreateSubScene {
             const task = await this.taskService.findTaskByName(message)
 
             ctx.wizard.state.main_task_id = task.id
-            await ctx.reply("Введите название задачи: ")
+            await ctx.reply("Enter the name of the task: ")
             ctx.wizard.next()
         }
 
         catch {
-            await ctx.reply("Данной задачи не было найдено, повторите попытку: ")
+            await ctx.reply("This task was not found, please try again: ")
             return
         }
 
@@ -45,13 +45,13 @@ export class CreateSubScene {
         const task = await this.taskService.findTaskByName(message, true)
 
         if (task) {
-            await ctx.reply("Задача с данным названием уже существует, повторите попытку: ")
+            await ctx.reply("A task with this name already exists, try again: ")
             return
         }
 
         else {
             ctx.wizard.state.title = message
-            await ctx.reply("Введите описание задачи\nЛибо введите команду /empty чтобы пропустить этот шаг: ")
+            await ctx.reply("Enter a description of the task\nOr type /empty to skip this step: ")
             ctx.wizard.next()
         }
 
@@ -60,10 +60,10 @@ export class CreateSubScene {
     @WizardStep(4)
     async step4(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
-            await ctx.reply("Выберите тип ссылки: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Ссылка на внешние ресурсы", "OUTER"),
-                    Markup.button.callback("Ссылка на телеграм канал", "INNER"),
+                    Markup.button.callback("Link to external resources", "OUTER"),
+                    Markup.button.callback("Link to telegram channel", "INNER"),
                 ]
             ))
             ctx.wizard.next()
@@ -71,10 +71,10 @@ export class CreateSubScene {
 
         else {
             ctx.wizard.state.description = message
-            await ctx.reply("Выберите тип ссылки: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Ссылка на внешние ресурсы", "OUTER"),
-                    Markup.button.callback("Ссылка на телеграм канал", "INNER"),
+                    Markup.button.callback("Link to external resources", "OUTER"),
+                    Markup.button.callback("Link to telegram channel", "INNER"),
                 ]
             ))
             ctx.wizard.next()
@@ -84,10 +84,10 @@ export class CreateSubScene {
     @WizardStep(5)
     @On("text")
     async step5_text(@Ctx() ctx: IWizardContext) {
-        await ctx.reply("Выберите тип ссылки: ", Markup.inlineKeyboard(
+        await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
             [
-                Markup.button.callback("Ссылка на внешние ресурсы", "OUTER"),
-                Markup.button.callback("Ссылка на телеграм канал", "INNER"),
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
             ]
         ))
 
@@ -97,7 +97,7 @@ export class CreateSubScene {
     @WizardStep(5)
     @Action("OUTER")
     async step5_out(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Введите ссылку: ")
+        ctx.reply("Enter link: ")
         ctx.wizard.state.link_type = "OUTER"
         ctx.wizard.next()
     }
@@ -105,7 +105,7 @@ export class CreateSubScene {
     @WizardStep(6)
     @Action("INNER")
     async step5_inner(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Введите новый ID телеграмм канала (Убедитесь, что бот является администратором этого канала): ")
+        ctx.reply("Enter a telegram channel ID (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
@@ -117,7 +117,7 @@ export class CreateSubScene {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
 
                 if (chatMember.status !== "administrator") {
-                    await ctx.reply("Проверьте является ли бот админом данного канала и повторите попытку: ")
+                    await ctx.reply("Check if the bot is the admin of this channel and try again: ")
                     return
                 }
 
@@ -129,7 +129,7 @@ export class CreateSubScene {
             }
 
             catch {
-                await ctx.reply("Проверьте является ли бот админом данного канала и повторите попытку: ")
+                await ctx.reply("Check if the bot is the admin of this channel and try again: ")
                 return
             }
         }
@@ -145,7 +145,7 @@ export class CreateSubScene {
             )
 
             if (!urlPattern.test(message)) {
-                await ctx.reply("Не верный формат URL! Повторите попытку: ")
+                await ctx.reply("Incorrect URL format! Try again: ")
                 return
             }
 
@@ -163,7 +163,7 @@ export class CreateSubScene {
             main_task_id: state.main_task_id
         }, state.main_task_id)
 
-        await ctx.reply("Подзадача успешно создана !")
+        await ctx.reply("Subtask successfully created !")
         ctx.scene.leave()
     }
 

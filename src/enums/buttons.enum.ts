@@ -1,8 +1,8 @@
 export enum EnumButtons {
-    CREATE_TASK = "✉️ Создание задачи",
-    UPDATE_TASK = "✏️ редактирование задачи",
-    DELETE_TASK = "❌ Удаление задачи",
-    CREATE_SUB_TASK = "✉️ Создание подзадачи",
-    BACK = "◀️ Вернуться на предыдущий шаг"
+    CREATE_TASK = "✉️ Creating a task",
+    UPDATE_TASK = "✏️ Edit task",
+    DELETE_TASK = "❌ Deleting a task",
+    CREATE_SUB_TASK = "✉️ Creating a subtask",
+    BACK = "◀️ Return to previous step"
 }
 
