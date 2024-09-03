@@ -49,6 +49,19 @@ export class BonusService {
         if (bonus.next_bonus_time.getTime() > new Date().getTime()) {
             throw new BadRequestException("You can not claim the bonus")
         }
+
+        const currentTime = new Date().getTime()
+        const nextBonusTime = bonus.next_bonus_time.getTime()
+
+        const timeDifference = currentTime - nextBonusTime
+
+        const dayDifference = timeDifference / (1000 * 60 * 60 * 24)
+
+        if (dayDifference >= 1 && bonus.currentDay !== 0) {
+            bonus.currentDay = 0
+
+            await bonus.save()
+        }
         
         user.coins += 50 * (bonus.currentDay + 1)
 
