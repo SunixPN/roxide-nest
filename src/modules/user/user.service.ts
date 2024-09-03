@@ -3,9 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { QueryTypes } from 'sequelize';
 import { Bonus } from 'src/entities/bonus.model';
 import { Farm } from 'src/entities/farm.model';
-import { Task } from 'src/entities/task.model';
 import { ICreateUser, User } from 'src/entities/user.model';
-import { UserTask } from 'src/entities/userTask.model';
 import { TelegramService } from 'src/telegram/telegram.service';
 
 interface IResult {
@@ -18,8 +16,6 @@ export class UserService {
         @InjectModel(User) private readonly userRepository: typeof User,
         @InjectModel(Farm) private readonly farmRepository: typeof Farm,
         @InjectModel(Bonus) private readonly bonusRepository: typeof Bonus,
-        @InjectModel(Task) private readonly taskRepository: typeof Task,
-        @InjectModel(UserTask) private readonly userTaskRepository: typeof UserTask,
         @Inject(forwardRef(() => TelegramService)) private readonly telegramService: TelegramService
         ) {}
 
@@ -40,16 +36,6 @@ export class UserService {
 
         await user.$set("Farm", farm)
         await user.$set("Bonus", bonus)
-
-        const tasks = await this.taskRepository.findAll()
-
-        await Promise.all(
-            tasks.map(async task => {
-                await this.userTaskRepository.create({
-                    task_id: task.id,
-                    user_id: user.id
-                })
-        }))
     }
 
     async usersRaiting(user: User) {
