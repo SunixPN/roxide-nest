@@ -25,6 +25,9 @@ export class User extends Model<User, ICreateUser> {
   @Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
   coins: number
 
+  @Column({ type: INTEGER, allowNull: false, defaultValue: 15 })
+  referals_count: number
+
   @Column({ type: DataType.ENUM("admin", "user"), allowNull: false, defaultValue: "user" })
   role: EnumRoles
 

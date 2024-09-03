@@ -50,7 +50,7 @@ export class TelegramService extends Telegraf<Context> {
                     include: ["Referrals", "Revenues"]
                 })
 
-                if (!ref_user || ref_user.Referrals.length >= 15) {
+                if (!ref_user || ref_user.Referrals.length >= ref_user.referals_count) {
                     ctx.reply(`Hi, @${ctx.from.username}! This invite link doesn't work, find another one and try again`, Markup.inlineKeyboard(
                         [
                             Markup.button.url("Join the community!", LinksEnum.CHANNEL_URL),
