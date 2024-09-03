@@ -33,12 +33,9 @@ export class UserService {
             userId: user.id
         })
 
-        const currentDate = new Date()
-        currentDate.setDate(currentDate.getDate() + 1)
-
         const bonus = await this.bonusRepository.create({
             userId: user.id,
-            next_bonus_time: currentDate
+            next_bonus_time: new Date()
         })
 
         await user.$set("Farm", farm)
