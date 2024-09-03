@@ -9,6 +9,25 @@ export class BonusService {
 
         let status: EnumBonusStatus
 
+        const currentTime = new Date().getTime()
+        const nextBonusTime = bonus.next_bonus_time.getTime()
+
+        const timeDifference = currentTime - nextBonusTime
+
+        const dayDifference = timeDifference / (1000 * 60 * 60 * 24)
+
+        if (dayDifference >= 1 && bonus.currentDay !== 0) {
+            status = EnumBonusStatus.CLAIM
+            bonus.currentDay = 0
+            await bonus.save()
+
+            return {
+                next_bonus_time: bonus.next_bonus_time,
+                status: status,
+                day: bonus.currentDay
+            }
+        }
+
         if (bonus.next_bonus_time.getTime() <= new Date().getTime()) {
             status = EnumBonusStatus.CLAIM
         }
@@ -33,7 +52,7 @@ export class BonusService {
         
         user.coins += 50 * (bonus.currentDay + 1)
 
-        bonus.currentDay = bonus.currentDay === 9 ? 0 : bonus.currentDay + 1
+        bonus.currentDay = bonus.currentDay === 6 ? 0 : bonus.currentDay + 1
 
         const currentDate = new Date()
         currentDate.setDate(currentDate.getDate() + 1)
