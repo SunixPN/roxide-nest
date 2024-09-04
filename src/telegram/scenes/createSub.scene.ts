@@ -91,20 +91,24 @@ export class CreateSubScene {
             ]
         ))
 
+        console.log("SELECT")
+
         return
     }
 
     @WizardStep(5)
     @Action("OUTER")
     async step5_out(@Ctx() ctx: IWizardContext) {
+        console.log("OUTER")
         ctx.reply("Enter link: ")
         ctx.wizard.state.link_type = "OUTER"
         ctx.wizard.next()
     }
 
-    @WizardStep(6)
+    @WizardStep(5)
     @Action("INNER")
     async step5_inner(@Ctx() ctx: IWizardContext) {
+        console.log("INNER")
         ctx.reply("Enter a telegram channel ID (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
