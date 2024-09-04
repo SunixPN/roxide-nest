@@ -4,6 +4,7 @@ import { ITaskCreate, Task } from "src/entities/task.model";
 import { EnumButtons } from "src/enums/buttons.enum";
 import { TaskService } from "src/modules/task/task.service";
 import { Markup, Scenes } from "telegraf";
+import { ChatFromGetChat } from "telegraf/typings/core/types/typegram";
 import { WizardContext } from "telegraf/typings/scenes";
 
 interface MyWizard extends Scenes.WizardContextWizard<Scenes.WizardContext<Scenes.WizardSessionData>> {
@@ -13,6 +14,10 @@ interface MyWizard extends Scenes.WizardContextWizard<Scenes.WizardContext<Scene
 export interface IWizardContext extends WizardContext {
     wizard: MyWizard
 }
+
+export type IChatWithLink = {
+    invite_link?: string
+} & ChatFromGetChat
 
 @Injectable()
 @Wizard("create-task")
@@ -70,7 +75,7 @@ export class CreateTaskScene {
 
         else {
             ctx.wizard.state.coins = +message
-            await ctx.reply("Select the link type/nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the link type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
                 [
                     Markup.button.callback("Link to external resources", "OUTER"),
                     Markup.button.callback("Link to telegram channel", "INNER"),
@@ -134,6 +139,7 @@ export class CreateTaskScene {
         if (ctx.wizard.state.link_type === "INNER") {
             try {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
+                const chat = await ctx.telegram.getChat(message)
 
                 if (chatMember.status !== "administrator") {
                     await ctx.reply("Check if the bot is the admin of this channel and try again: ")
@@ -142,6 +148,8 @@ export class CreateTaskScene {
 
                 else {
                     ctx.wizard.state.channel_id = message
+                    const chatWithLink = chat as IChatWithLink
+                    ctx.wizard.state.channel_link = chatWithLink?.invite_link ?? null
                 }    
             }
 
@@ -177,7 +185,8 @@ export class CreateTaskScene {
             coins: state.coins,
             link: state.link,
             channel_id: state.channel_id,
-            main_task_id: null
+            main_task_id: null,
+            channel_link: state.channel_link
         })
         await ctx.reply("The task has been successfully created !")
         ctx.scene.leave()

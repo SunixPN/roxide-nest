@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Action, Ctx, Hears, Message, On, Wizard, WizardStep } from "nestjs-telegraf";
 import { TaskService } from "src/modules/task/task.service";
 import { Markup } from "telegraf";
-import { IWizardContext } from "./create.scene";
+import { IChatWithLink, IWizardContext } from "./create.scene";
 import { EnumButtons } from "src/enums/buttons.enum";
 
 @Injectable()
@@ -152,6 +152,7 @@ export class UpdateTaskScene {
         if (ctx.wizard.state.link_type === "INNER") {
             try {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
+                const chat = await ctx.telegram.getChat(message)
 
                 if (chatMember.status !== "administrator") {
                     await ctx.reply("Check if the bot is the admin of this channel and try again: ")
@@ -160,6 +161,9 @@ export class UpdateTaskScene {
 
                 else {
                     ctx.wizard.state.channel_id = message
+                    const chatWithLink = chat as IChatWithLink
+
+                    ctx.wizard.state.channel_link = chatWithLink?.invite_link ?? null
                 }
 
                 
@@ -198,7 +202,8 @@ export class UpdateTaskScene {
             coins: state.coins,
             link: state.link,
             channel_id: state.channel_id,
-            main_task_id: null
+            main_task_id: null,
+            channel_link: state.channel_link
         }, state.main_task_id)
 
         await ctx.reply("The task has been successfully updated !")
