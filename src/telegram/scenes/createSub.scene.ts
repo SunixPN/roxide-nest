@@ -129,8 +129,8 @@ export class CreateSubScene {
                 else {
                     ctx.wizard.state.channel_id = message
                     const chatWithLink = chat as IChatWithLink
-
-                    ctx.wizard.state.channel_link = `https://t.me/${chatWithLink.username}` 
+                    const link = chatWithLink.username ? `https://t.me/${chatWithLink.username}` : chatWithLink.invite_link ?? null
+                    ctx.wizard.state.channel_link = link
                 }
 
                 

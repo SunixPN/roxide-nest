@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Action, Ctx, Hears, Message, On, Wizard, WizardStep } from "nestjs-telegraf";
+import { channel } from "process";
 import { ITaskCreate, Task } from "src/entities/task.model";
 import { EnumButtons } from "src/enums/buttons.enum";
 import { TaskService } from "src/modules/task/task.service";
@@ -152,7 +153,8 @@ export class CreateTaskScene {
                 else {
                     ctx.wizard.state.channel_id = message
                     const chatWithLink = chat as IChatWithLink
-                    ctx.wizard.state.channel_link = `https://t.me/${chatWithLink.username}`
+                    const link = chatWithLink.username ? `https://t.me/${chatWithLink.username}` : chatWithLink.invite_link ?? null
+                    ctx.wizard.state.channel_link = link
                 }    
             }
 
