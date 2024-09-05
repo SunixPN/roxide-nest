@@ -142,7 +142,7 @@ export class UpdateTaskScene {
     @WizardStep(6)
     @Action("INNER")
     async step6_inner(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Enter a new telegram channel ID (Make sure the bot is the administrator of this channel): ")
+        ctx.reply("Enter a new telegram channel (@[channel name]) (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
@@ -163,7 +163,7 @@ export class UpdateTaskScene {
                     ctx.wizard.state.channel_id = message
                     const chatWithLink = chat as IChatWithLink
 
-                    ctx.wizard.state.channel_link = chatWithLink?.invite_link ?? null
+                    ctx.wizard.state.channel_link = `https://t.me/${chatWithLink.username}`
                 }
 
                 

@@ -16,7 +16,8 @@ export interface IWizardContext extends WizardContext {
 }
 
 export type IChatWithLink = {
-    invite_link?: string
+    invite_link?: string,
+    username: string
 } & ChatFromGetChat
 
 @Injectable()
@@ -129,7 +130,7 @@ export class CreateTaskScene {
     @WizardStep(5)
     @Action("INNER")
     async step5_inner(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Enter the telegram channel ID (Make sure the bot is the administrator of this channel): ")
+        ctx.reply("Enter the telegram channel (@[channel name]) (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
@@ -141,6 +142,8 @@ export class CreateTaskScene {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
                 const chat = await ctx.telegram.getChat(message)
 
+                console.log(chat)
+
                 if (chatMember.status !== "administrator") {
                     await ctx.reply("Check if the bot is the admin of this channel and try again: ")
                     return
@@ -149,7 +152,7 @@ export class CreateTaskScene {
                 else {
                     ctx.wizard.state.channel_id = message
                     const chatWithLink = chat as IChatWithLink
-                    ctx.wizard.state.channel_link = chatWithLink?.invite_link ?? null
+                    ctx.wizard.state.channel_link = `https://t.me/${chatWithLink.username}`
                 }    
             }
 

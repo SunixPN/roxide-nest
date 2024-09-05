@@ -109,7 +109,7 @@ export class CreateSubScene {
     @Action("INNER")
     async step5_inner(@Ctx() ctx: IWizardContext) {
         console.log("INNER")
-        ctx.reply("Enter a telegram channel ID (Make sure the bot is the administrator of this channel): ")
+        ctx.reply("Enter the telegram channel (@[channel name]) (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
@@ -130,7 +130,7 @@ export class CreateSubScene {
                     ctx.wizard.state.channel_id = message
                     const chatWithLink = chat as IChatWithLink
 
-                    ctx.wizard.state.channel_link = chatWithLink?.invite_link ?? null  
+                    ctx.wizard.state.channel_link = `https://t.me/${chatWithLink.username}` 
                 }
 
                 
