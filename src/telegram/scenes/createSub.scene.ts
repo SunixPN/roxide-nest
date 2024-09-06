@@ -4,6 +4,7 @@ import { TaskService } from "src/modules/task/task.service";
 import { Markup } from "telegraf";
 import { IChatWithLink, IWizardContext } from "./create.scene";
 import { EnumButtons } from "src/enums/buttons.enum";
+import { EnumIcons } from "src/enums/icons.enum";
 
 @Injectable()
 @Wizard("create-sub")
@@ -57,13 +58,18 @@ export class CreateSubScene {
 
     }
 
+    /////
+
     @WizardStep(4)
     async step4(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
-            await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Link to external resources", "OUTER"),
-                    Markup.button.callback("Link to telegram channel", "INNER"),
+                    Markup.button.callback("Youtube", "YT"),
+                    Markup.button.callback("Telegram", "TG"),
+                    Markup.button.callback("Twitter", "TW"),
+                    Markup.button.callback("Facebook", "FB"),
+                    Markup.button.callback("Instagram", "IN"),
                 ]
             ))
             ctx.wizard.next()
@@ -71,10 +77,13 @@ export class CreateSubScene {
 
         else {
             ctx.wizard.state.description = message
-            await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Link to external resources", "OUTER"),
-                    Markup.button.callback("Link to telegram channel", "INNER"),
+                    Markup.button.callback("Youtube", "YT"),
+                    Markup.button.callback("Telegram", "TG"),
+                    Markup.button.callback("Twitter", "TW"),
+                    Markup.button.callback("Facebook", "FB"),
+                    Markup.button.callback("Instagram", "IN"),
                 ]
             ))
             ctx.wizard.next()
@@ -83,7 +92,82 @@ export class CreateSubScene {
 
     @WizardStep(5)
     @On("text")
-    async step5_text(@Ctx() ctx: IWizardContext) {
+    async step5_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        if (message === "/empty") {
+            ctx.wizard.next()
+        }
+
+        else {
+            await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+                [
+                    Markup.button.callback("Youtube", "YT"),
+                    Markup.button.callback("Telegram", "TG"),
+                    Markup.button.callback("Twitter", "TW"),
+                    Markup.button.callback("Facebook", "FB"),
+                    Markup.button.callback("Instagram", "IN"),
+                ]
+            ))
+            return
+        }
+    }
+
+    @WizardStep(5)
+    @Action("YT")
+    async step5_yt(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.YOUTUBE
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(5)
+    @Action("TG")
+    async step5_tg(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.TELEGRAM
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(5)
+    @Action("TW")
+    async step5_tw(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.TWITTER
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(5)
+    @Action("FB")
+    async step5_fc(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.FACEBOOK
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(5)
+    @Action("IN")
+    async step5_in(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.INSTAGRAM
+        ctx.wizard.next()
+
+    }
+
+
+    ////
+
+    @WizardStep(6)
+    async step6(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
+            ]
+        ))
+        ctx.wizard.next()
+    }
+
+    @WizardStep(7)
+    @On("text")
+    async step7_text(@Ctx() ctx: IWizardContext) {
         await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
             [
                 Markup.button.callback("Link to external resources", "OUTER"),
@@ -96,26 +180,26 @@ export class CreateSubScene {
         return
     }
 
-    @WizardStep(5)
+    @WizardStep(7)
     @Action("OUTER")
-    async step5_out(@Ctx() ctx: IWizardContext) {
+    async step7_out(@Ctx() ctx: IWizardContext) {
         console.log("OUTER")
         ctx.reply("Enter link: ")
         ctx.wizard.state.link_type = "OUTER"
         ctx.wizard.next()
     }
 
-    @WizardStep(5)
+    @WizardStep(7)
     @Action("INNER")
-    async step5_inner(@Ctx() ctx: IWizardContext) {
+    async step7_inner(@Ctx() ctx: IWizardContext) {
         console.log("INNER")
         ctx.reply("Enter the telegram channel (@[channel name]) (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
 
-    @WizardStep(6)
-    async step6(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    @WizardStep(8)
+    async step8(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (ctx.wizard.state.link_type === "INNER") {
             try {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
@@ -169,7 +253,8 @@ export class CreateSubScene {
             link: state.link,
             channel_id: state.channel_id,
             main_task_id: state.main_task_id,
-            channel_link: state.channel_link
+            channel_link: state.channel_link,
+            icon: state.icon
         }, state.main_task_id)
 
         await ctx.reply("Subtask successfully created !")

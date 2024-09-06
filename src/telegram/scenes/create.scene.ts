@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Action, Ctx, Hears, Message, On, Wizard, WizardStep } from "nestjs-telegraf";
-import { channel } from "process";
-import { ITaskCreate, Task } from "src/entities/task.model";
+import { ITaskCreate } from "src/entities/task.model";
 import { EnumButtons } from "src/enums/buttons.enum";
+import { EnumIcons } from "src/enums/icons.enum";
 import { TaskService } from "src/modules/task/task.service";
 import { Markup, Scenes } from "telegraf";
 import { ChatFromGetChat } from "telegraf/typings/core/types/typegram";
@@ -77,22 +77,95 @@ export class CreateTaskScene {
 
         else {
             ctx.wizard.state.coins = +message
-            await ctx.reply("Select the link type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Link to external resources", "OUTER"),
-                    Markup.button.callback("Link to telegram channel", "INNER"),
+                    Markup.button.callback("Youtube", "YT"),
+                    Markup.button.callback("Telegram", "TG"),
+                    Markup.button.callback("Twitter", "TW"),
+                    Markup.button.callback("Facebook", "FB"),
+                    Markup.button.callback("Instagram", "IN"),
                 ]
             ))
             ctx.wizard.next()
         }
-
-
-
     }
 
     @WizardStep(5)
     @On("text")
     async step5_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        if (message === "/empty") {
+            ctx.wizard.next()
+        }
+
+        else {
+            await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+                [
+                    Markup.button.callback("Youtube", "YT"),
+                    Markup.button.callback("Telegram", "TG"),
+                    Markup.button.callback("Twitter", "TW"),
+                    Markup.button.callback("Facebook", "FB"),
+                    Markup.button.callback("Instagram", "IN"),
+                ]
+            ))
+            return
+        }
+    }
+
+    @WizardStep(5)
+    @Action("YT")
+    async step5_yt(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.YOUTUBE
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(5)
+    @Action("TG")
+    async step5_tg(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.TELEGRAM
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(5)
+    @Action("TW")
+    async step5_tw(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.TWITTER
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(5)
+    @Action("FB")
+    async step5_fc(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.FACEBOOK
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(5)
+    @Action("IN")
+    async step5_in(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.INSTAGRAM
+        ctx.wizard.next()
+
+    }
+
+
+    @WizardStep(6)
+    async step6(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        await ctx.reply("Select the link type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
+            ]
+        ))
+        ctx.wizard.next()
+    }
+
+    @WizardStep(7)
+    @On("text")
+    async step7_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
             const state = ctx.wizard.state
 
@@ -102,7 +175,8 @@ export class CreateTaskScene {
                 coins: state.coins,
                 link: state.link,
                 channel_id: state.channel_id,
-                main_task_id: null
+                main_task_id: null,
+                icon: state.icon
             })
             await ctx.reply("The task has been successfully created !")
             ctx.scene.leave()
@@ -120,24 +194,24 @@ export class CreateTaskScene {
         
     }
 
-    @WizardStep(5)
+    @WizardStep(7)
     @Action("OUTER")
-    async step5_out(@Ctx() ctx: IWizardContext) {
+    async step7_out(@Ctx() ctx: IWizardContext) {
         ctx.reply("Enter link: ")
         ctx.wizard.state.link_type = "OUTER"
         ctx.wizard.next()
     }
 
-    @WizardStep(5)
+    @WizardStep(7)
     @Action("INNER")
-    async step5_inner(@Ctx() ctx: IWizardContext) {
+    async step7_inner(@Ctx() ctx: IWizardContext) {
         ctx.reply("Enter the telegram channel (@[channel name]) (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
 
-    @WizardStep(6)
-    async step6_out(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    @WizardStep(8)
+    async step8_out(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (ctx.wizard.state.link_type === "INNER") {
             try {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
@@ -191,7 +265,8 @@ export class CreateTaskScene {
             link: state.link,
             channel_id: state.channel_id,
             main_task_id: null,
-            channel_link: state.channel_link
+            channel_link: state.channel_link,
+            icon: state.icon
         })
         await ctx.reply("The task has been successfully created !")
         ctx.scene.leave()

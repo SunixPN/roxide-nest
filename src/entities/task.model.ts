@@ -1,7 +1,8 @@
-import { Column, Table, Model, BelongsToMany, HasMany, ForeignKey } from 'sequelize-typescript'
+import { Column, Table, Model, BelongsToMany, HasMany, ForeignKey, DataType } from 'sequelize-typescript'
 import { INTEGER, STRING } from 'sequelize'
 import { User } from './user.model'
 import { UserTask } from './userTask.model'
+import { EnumIcons } from 'src/enums/icons.enum'
 
 export interface ITaskCreate {
     title: string,
@@ -10,7 +11,8 @@ export interface ITaskCreate {
     coins?: number,
     channel_id?: string,
     main_task_id: number,
-    channel_link?: string
+    channel_link?: string,
+    icon?: EnumIcons
 }
 
 @Table
@@ -27,6 +29,9 @@ export class Task extends Model<Task, ITaskCreate> {
 
   @Column({ allowNull: true, type: STRING })
   channel_id: string
+
+  @Column({ allowNull: false, type: DataType.ENUM("facebook", "telegram", "twitter", "youtube", "fire"), defaultValue: "fire" })
+  icon: EnumIcons
 
   @Column({ allowNull: true, type: STRING })
   channel_link: string

@@ -4,6 +4,7 @@ import { TaskService } from "src/modules/task/task.service";
 import { Markup } from "telegraf";
 import { IChatWithLink, IWizardContext } from "./create.scene";
 import { EnumButtons } from "src/enums/buttons.enum";
+import { EnumIcons } from "src/enums/icons.enum";
 
 @Injectable()
 @Wizard("update-task")
@@ -74,13 +75,19 @@ export class UpdateTaskScene {
         }
     }
 
+
+    ///
+
     @WizardStep(5)
     async step5(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
-            await ctx.reply("Select the link type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the new icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Link to external resources", "OUTER"),
-                    Markup.button.callback("Link to telegram channel", "INNER"),
+                    Markup.button.callback("Youtube", "YT"),
+                    Markup.button.callback("Telegram", "TG"),
+                    Markup.button.callback("Twitter", "TW"),
+                    Markup.button.callback("Facebook", "FB"),
+                    Markup.button.callback("Instagram", "IN"),
                 ]
             ))
             ctx.wizard.next()
@@ -92,22 +99,94 @@ export class UpdateTaskScene {
 
         else {
             ctx.wizard.state.coins = +message
-            await ctx.reply("Select the link type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+            await ctx.reply("Select the new icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
                 [
-                    Markup.button.callback("Link to external resources", "OUTER"),
-                    Markup.button.callback("Link to telegram channel", "INNER"),
+                    Markup.button.callback("Youtube", "YT"),
+                    Markup.button.callback("Telegram", "TG"),
+                    Markup.button.callback("Twitter", "TW"),
+                    Markup.button.callback("Facebook", "FB"),
+                    Markup.button.callback("Instagram", "IN"),
                 ]
             ))
             ctx.wizard.next()
         }
-
-
-
     }
 
     @WizardStep(6)
     @On("text")
     async step6_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        if (message === "/empty") {
+            ctx.wizard.next()
+        }
+
+        else {
+            await ctx.reply("Select the new icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+                [
+                    Markup.button.callback("Youtube", "YT"),
+                    Markup.button.callback("Telegram", "TG"),
+                    Markup.button.callback("Twitter", "TW"),
+                    Markup.button.callback("Facebook", "FB"),
+                    Markup.button.callback("Instagram", "IN"),
+                ]
+            ))
+            return
+        }
+    }
+
+    @WizardStep(6)
+    @Action("YT")
+    async step6_yt(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.YOUTUBE
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(6)
+    @Action("TG")
+    async step6_tg(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.TELEGRAM
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(6)
+    @Action("TW")
+    async step6_tw(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.TWITTER
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(6)
+    @Action("FB")
+    async step6_fc(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.FACEBOOK
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(6)
+    @Action("IN")
+    async step6_in(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.INSTAGRAM
+        ctx.wizard.next()
+
+    }
+
+    @WizardStep(7)
+    async step7(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        await ctx.reply("Select the link type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
+            ]
+        ))
+        ctx.wizard.next()
+    }
+
+    @WizardStep(8)
+    @On("text")
+    async step8_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
             const state = ctx.wizard.state
 
@@ -117,6 +196,7 @@ export class UpdateTaskScene {
                 coins: state.coins,
                 link: state.link,
                 channel_id: state.channel_id,
+                icon: state.icon,
                 main_task_id: null
             }, state.main_task_id)
     
@@ -131,24 +211,24 @@ export class UpdateTaskScene {
         
     }
 
-    @WizardStep(6)
+    @WizardStep(8)
     @Action("OUTER")
-    async step6_out(@Ctx() ctx: IWizardContext) {
+    async step8_out(@Ctx() ctx: IWizardContext) {
         ctx.reply("Enter a new link: ")
         ctx.wizard.state.link_type = "OUTER"
         ctx.wizard.next()
     }
 
-    @WizardStep(6)
+    @WizardStep(8)
     @Action("INNER")
-    async step6_inner(@Ctx() ctx: IWizardContext) {
+    async step8_inner(@Ctx() ctx: IWizardContext) {
         ctx.reply("Enter a new telegram channel (@[channel name]) (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
 
-    @WizardStep(7)
-    async step7(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    @WizardStep(9)
+    async step9(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (ctx.wizard.state.link_type === "INNER") {
             try {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
@@ -203,7 +283,8 @@ export class UpdateTaskScene {
             link: state.link,
             channel_id: state.channel_id,
             main_task_id: null,
-            channel_link: state.channel_link
+            channel_link: state.channel_link,
+            icon: state.icon
         }, state.main_task_id)
 
         await ctx.reply("The task has been successfully updated !")
