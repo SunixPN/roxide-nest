@@ -76,7 +76,8 @@ export class TaskService {
             description: task.description ?? updateTask.description,
             link: task.link ?? updateTask.link,
             channel_id: task.channel_id ?? updateTask.channel_id,
-            coins: task.coins ?? updateTask.coins
+            coins: task.coins ?? updateTask.coins,
+            icon: task.icon ?? updateTask.icon
         })
     }
 
