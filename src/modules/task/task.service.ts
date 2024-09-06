@@ -240,7 +240,9 @@ export class TaskService {
                 }
             })
 
-            if (userSubTasks.every(userTask => userTask.task_status === EnumTaskStatus.COMPLETED )) {
+            const isAllStartSubTasks = userSubTasks.length === mainTask.sub_tasks.length
+
+            if (userSubTasks.every(userTask => userTask.task_status === EnumTaskStatus.COMPLETED ) && isAllStartSubTasks) {
                 const userMainTask = await this.findUserTask(user.id, task.main_task_id)
 
                 userMainTask.task_status = EnumTaskStatus.COMPLETED
