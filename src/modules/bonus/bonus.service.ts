@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from 'src/entities/user.model';
 import { EnumBonusStatus } from 'src/enums/bonusStatus.enum';
+import { bonusSwitch } from 'src/helpers/bonus';
 
 @Injectable()
 export class BonusService {
@@ -62,8 +63,10 @@ export class BonusService {
 
             await bonus.save()
         }
+
+        const bonusCoins = bonusSwitch(bonus.currentDay + 1)
         
-        user.coins += 50 * (bonus.currentDay + 1)
+        user.coins += bonusCoins
 
         bonus.currentDay = bonus.currentDay === 6 ? 0 : bonus.currentDay + 1
 
