@@ -70,7 +70,10 @@ export class CreateSubScene {
                     Markup.button.callback("Twitter", "TW"),
                     Markup.button.callback("Facebook", "FB"),
                     Markup.button.callback("Instagram", "IN"),
-                ]
+                ],
+                {
+                    columns: 2
+                }
             ))
             ctx.wizard.next()
         }
@@ -84,7 +87,10 @@ export class CreateSubScene {
                     Markup.button.callback("Twitter", "TW"),
                     Markup.button.callback("Facebook", "FB"),
                     Markup.button.callback("Instagram", "IN"),
-                ]
+                ],
+                {
+                    columns: 2
+                }
             ))
             ctx.wizard.next()
         }
@@ -94,6 +100,12 @@ export class CreateSubScene {
     @On("text")
     async step5_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
+            await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+                [
+                    Markup.button.callback("Link to external resources", "OUTER"),
+                    Markup.button.callback("Link to telegram channel", "INNER"),
+                ]
+            ))
             ctx.wizard.next()
         }
 
@@ -105,7 +117,10 @@ export class CreateSubScene {
                     Markup.button.callback("Twitter", "TW"),
                     Markup.button.callback("Facebook", "FB"),
                     Markup.button.callback("Instagram", "IN"),
-                ]
+                ],
+                {
+                    columns: 2
+                }
             ))
             return
         }
@@ -115,6 +130,12 @@ export class CreateSubScene {
     @Action("YT")
     async step5_yt(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.YOUTUBE
+        await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
+            ]
+        ))
         ctx.wizard.next()
 
     }
@@ -123,6 +144,12 @@ export class CreateSubScene {
     @Action("TG")
     async step5_tg(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.TELEGRAM
+        await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
+            ]
+        ))
         ctx.wizard.next()
 
     }
@@ -131,6 +158,12 @@ export class CreateSubScene {
     @Action("TW")
     async step5_tw(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.TWITTER
+        await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
+            ]
+        ))
         ctx.wizard.next()
 
     }
@@ -139,6 +172,12 @@ export class CreateSubScene {
     @Action("FB")
     async step5_fc(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.FACEBOOK
+        await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
+            ]
+        ))
         ctx.wizard.next()
 
     }
@@ -147,6 +186,12 @@ export class CreateSubScene {
     @Action("IN")
     async step5_in(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.INSTAGRAM
+        await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Link to external resources", "OUTER"),
+                Markup.button.callback("Link to telegram channel", "INNER"),
+            ]
+        ))
         ctx.wizard.next()
 
     }
@@ -155,19 +200,8 @@ export class CreateSubScene {
     ////
 
     @WizardStep(6)
-    async step6(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Link to external resources", "OUTER"),
-                Markup.button.callback("Link to telegram channel", "INNER"),
-            ]
-        ))
-        ctx.wizard.next()
-    }
-
-    @WizardStep(7)
     @On("text")
-    async step7_text(@Ctx() ctx: IWizardContext) {
+    async step6_text(@Ctx() ctx: IWizardContext) {
         await ctx.reply("Select the type of link: ", Markup.inlineKeyboard(
             [
                 Markup.button.callback("Link to external resources", "OUTER"),
@@ -180,26 +214,26 @@ export class CreateSubScene {
         return
     }
 
-    @WizardStep(7)
+    @WizardStep(6)
     @Action("OUTER")
-    async step7_out(@Ctx() ctx: IWizardContext) {
+    async step6_out(@Ctx() ctx: IWizardContext) {
         console.log("OUTER")
         ctx.reply("Enter link: ")
         ctx.wizard.state.link_type = "OUTER"
         ctx.wizard.next()
     }
 
-    @WizardStep(7)
+    @WizardStep(6)
     @Action("INNER")
-    async step7_inner(@Ctx() ctx: IWizardContext) {
+    async step6_inner(@Ctx() ctx: IWizardContext) {
         console.log("INNER")
         ctx.reply("Enter the telegram channel (@[channel name]) (Make sure the bot is the administrator of this channel): ")
         ctx.wizard.state.link_type = "INNER"
         ctx.wizard.next()
     }
 
-    @WizardStep(8)
-    async step8(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    @WizardStep(7)
+    async step7(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (ctx.wizard.state.link_type === "INNER") {
             try {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
