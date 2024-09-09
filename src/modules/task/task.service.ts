@@ -221,6 +221,36 @@ export class TaskService {
         }
     }
 
+    async completeMainTask(user: User, main_id: number) {
+        const userTask = await this.findUserTask(user.id, main_id)
+
+        if (userTask.task.main_task_id || userTask.task.sub_tasks.length === 0) {
+            throw new BadRequestException("You can not complete this task")
+        }
+
+        const userSubTasks = await this.userTaskRepository.findAll({
+            where: {
+                user_id: user.id,
+                task_id: userTask.task.sub_tasks.map(task => task.id)
+            }
+        })
+
+        const isAllStartSubTasks = userSubTasks.length === userTask.task.sub_tasks.length
+
+        if (userSubTasks.every(userTask => userTask.task_status === EnumTaskStatus.COMPLETED ) && isAllStartSubTasks) {
+            userTask.task_status = EnumTaskStatus.COMPLETED
+
+            await userTask.save()
+    
+            return {
+                message: "Task is successfuly update",
+                status: userTask.task_status
+            }
+        }
+
+        throw new BadRequestException("You can not complete this task")
+    }
+
     private async updateMainTask(task: Task, user: User) {
         if (task.main_task_id) {
             const mainTask = await this.taskRepository.findOne({

@@ -40,6 +40,12 @@ export class TaskController {
     return this.taskService.startTask(user, +id)
   }
 
+  @Post("/complete-main/:id")
+  @UseGuards(AuthGuard)
+  completeMain(@Req() { user }, @Param("id") id: string) {
+    return this.taskService.completeMainTask(user as User, +id)
+  }
+
   @Get("/goToLink/:telegram_id/:link/:id")
   @Redirect()
   goToLink(
