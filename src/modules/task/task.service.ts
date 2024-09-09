@@ -231,6 +231,8 @@ export class TaskService {
         const userTask = await this.findUserTask(user.id, main_id)
         const mainTask = await this.findTask(main_id)
 
+        console.log(mainTask)
+
         if (mainTask.main_task_id || mainTask.sub_tasks.length === 0) {
             throw new BadRequestException("You can not complete this task")
         }
