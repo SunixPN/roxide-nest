@@ -229,8 +229,9 @@ export class TaskService {
 
     async completeMainTask(user: User, main_id: number) {
         const userTask = await this.findUserTask(user.id, main_id)
+        const mainTask = await this.findTask(main_id)
 
-        if (userTask.task.main_task_id || userTask.task.sub_tasks.length === 0) {
+        if (mainTask.main_task_id || mainTask.sub_tasks.length === 0) {
             throw new BadRequestException("You can not complete this task")
         }
 
@@ -241,7 +242,7 @@ export class TaskService {
             }
         })
 
-        const isAllStartSubTasks = userSubTasks.length === userTask.task.sub_tasks.length
+        const isAllStartSubTasks = userSubTasks.length === mainTask.sub_tasks.length
 
         if (userSubTasks.every(userTask => userTask.task_status === EnumTaskStatus.COMPLETED ) && isAllStartSubTasks) {
             userTask.task_status = EnumTaskStatus.COMPLETED
