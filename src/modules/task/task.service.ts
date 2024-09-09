@@ -229,9 +229,16 @@ export class TaskService {
 
     async completeMainTask(user: User, main_id: number) {
         const userTask = await this.findUserTask(user.id, main_id)
-        const mainTask = await this.findTask(main_id)
+        const mainTask = await this.taskRepository.findOne({
+            where: {
+                id: main_id
+            },
 
-        console.log(mainTask)
+            include: {
+                model: Task,
+                as: "sub_tasks"
+            }
+        })
 
         if (mainTask.main_task_id || mainTask.sub_tasks.length === 0) {
             throw new BadRequestException("You can not complete this task")
