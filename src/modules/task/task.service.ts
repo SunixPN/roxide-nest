@@ -211,7 +211,13 @@ export class TaskService {
             }
         }
 
-        userTask.task_status = EnumTaskStatus.IN_PROGRESS
+        if (task.link) {
+            userTask.task_status = EnumTaskStatus.COMPLETED
+        }
+
+        else {
+            userTask.task_status = EnumTaskStatus.IN_PROGRESS
+        }
 
         await userTask.save()
 
