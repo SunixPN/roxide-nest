@@ -247,7 +247,7 @@ export class TaskService {
         const userSubTasks = await this.userTaskRepository.findAll({
             where: {
                 user_id: user.id,
-                task_id: userTask.task.sub_tasks.map(task => task.id)
+                task_id: mainTask.sub_tasks.map(task => task.id)
             }
         })
 
