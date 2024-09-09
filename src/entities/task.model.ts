@@ -30,7 +30,7 @@ export class Task extends Model<Task, ITaskCreate> {
   @Column({ allowNull: true, type: STRING })
   channel_id: string
 
-  @Column({ allowNull: false, type: DataType.ENUM("facebook", "telegram", "twitter", "youtube", "fire"), defaultValue: "fire" })
+  @Column({ allowNull: false, type: DataType.ENUM("facebook", "telegram", "twitter", "youtube", "fire", "instagram"), defaultValue: "fire" })
   icon: EnumIcons
 
   @Column({ allowNull: true, type: STRING })
