@@ -36,7 +36,8 @@ export class ReferralService {
 			status: "Ok",
 			content: returnInfo,
 			revenues: revenues?.coins ?? 0,
-			next_revenues_time: revenues?.next_revenues_time ?? null
+			next_revenues_time: revenues?.next_revenues_time ?? null,
+			referals_limit: user.referals_count
 		}
 	}
 }
