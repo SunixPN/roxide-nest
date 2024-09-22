@@ -89,12 +89,10 @@ export class TelegramService extends Telegraf<Context> {
             await this.userService.createUser(new_user)
         }
 
-        console.log(join(__dirname, "../../", "public/video.gif"))
-
         ctx.replyWithAnimation(
             { source: join(__dirname, "../../", "public/video.gif") },
             {
-                caption: "**🚀 Welcome to BuxHub!**\n\nOur community can build a future based on productive collaboration and real results.\n\n**Soon you will be able to:**\ncreate, communicate, earn money - all in one application. A new era of evolution of social tasks is approaching.\n\n**🛸As for now… Earn BUX Points!**",
+                caption: "<b>🚀 Welcome to BuxHub!</b>\n\nOur community can build a future based on productive collaboration and real results.\n\n<b>Soon you will be able to:</b>\ncreate, communicate, earn money - all in one application. A new era of evolution of social tasks is approaching.\n\n<b>🛸As for now… Earn BUX Points!</b>",
                 parse_mode: "Markdown",
                 ...Markup.inlineKeyboard(
                     [
