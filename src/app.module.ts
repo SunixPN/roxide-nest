@@ -11,10 +11,15 @@ import { BonusModule } from './modules/bonus/bonus.module';
 import { UserModule } from './modules/user/user.module';
 import { TaskModule } from './modules/task/task.module';
 import { RevenuesModule } from './modules/revenues/revenues.module';
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { join } from 'path'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, "..", "public")
+    }),
     SequelizeModule.forRootAsync(options()),
     FarmModule,
     ReferralModule,
