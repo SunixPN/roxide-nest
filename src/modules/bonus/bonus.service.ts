@@ -37,10 +37,31 @@ export class BonusService {
             status = EnumBonusStatus.WAIT
         }
 
+        let welcome_status: boolean
+
+        const welcomeTime = bonus.next_welcome_date.getTime()
+        const timeWelcomeDifference = currentTime - welcomeTime
+        
+        if (timeWelcomeDifference >= 0) {
+            welcome_status = true
+
+            const currentDate = new Date()
+            currentDate.setDate(currentDate.getDate() + 3)
+
+            bonus.next_welcome_date = currentDate
+
+            await bonus.save()
+        }
+
+        else {
+            welcome_status = false
+        }
+
         return {
             next_bonus_time: bonus.next_bonus_time,
             status: status,
-            day: bonus.currentDay
+            day: bonus.currentDay,
+            welcome_status: welcome_status
         }
     }
 

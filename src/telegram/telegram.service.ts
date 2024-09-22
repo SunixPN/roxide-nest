@@ -1,7 +1,7 @@
 import { BadRequestException, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
-import {Start, Update, Ctx, Command, Hears, On} from 'nestjs-telegraf';
+import { Start, Update, Ctx, Command, Hears, On } from 'nestjs-telegraf';
 import { Revenues } from 'src/entities/revenues.model';
 import { ICreateUser, User } from 'src/entities/user.model';
 import { UserService } from 'src/modules/user/user.service';
@@ -21,9 +21,9 @@ export class TelegramService extends Telegraf<Context> {
         @InjectModel(Revenues) private readonly revenuesRepository: typeof Revenues,
         private readonly userService: UserService,
         private readonly configService: ConfigService,
-        ) { 
-            super(configService.get<string>("TELEGRAM_BOT_TOKEN")) 
-        }
+    ) {
+        super(configService.get<string>("TELEGRAM_BOT_TOKEN"))
+    }
 
     @Start()
     async index(@Ctx() ctx: Context) {
@@ -35,8 +35,8 @@ export class TelegramService extends Telegraf<Context> {
         })
 
         if (!candidate) {
-            const new_user: ICreateUser = { 
-                telegramId: BigInt(ctx.from.id) 
+            const new_user: ICreateUser = {
+                telegramId: BigInt(ctx.from.id)
             }
 
             const referal_id = ctx.text.split(" ")[1]
@@ -69,7 +69,7 @@ export class TelegramService extends Telegraf<Context> {
                     })
 
                     await ref_user.$set("Revenues", revenues)
-                    
+
                 }
 
                 new_user.referrerId = ref_user.id
@@ -88,15 +88,29 @@ export class TelegramService extends Telegraf<Context> {
             await this.userService.createUser(new_user)
         }
 
-        ctx.reply(`Hi, @${ctx.from.username}! Welcome to BUX!`, Markup.inlineKeyboard(
-            [
-                Markup.button.webApp("GO!", LinksEnum.TELEGRAM_MINI_APP_URL),
-                Markup.button.url("Join the community!", LinksEnum.CHANNEL_URL),
-            ],
+        ctx.replyWithPhoto(
+            { source: "path" },
             {
-                columns: 1
+                caption: "**🚀 Welcome to BuxHub!**\n\nOur community can build a future based on productive collaboration and real results.\n\n**Soon you will be able to:**\ncreate, communicate, earn money - all in one application. A new era of evolution of social tasks is approaching.\n\n**🛸As for now… Earn BUX Points!**",
+                parse_mode: "Markdown",
+                ...Markup.inlineKeyboard(
+                    [
+                        Markup.button.webApp("Launch BuxHub", LinksEnum.TELEGRAM_MINI_APP_URL),
+                        Markup.button.url("Join Community!", LinksEnum.CHANNEL_URL),
+                    ]
+                )
             }
-        ))
+        )
+
+        ctx.replyWithPhoto(``, Markup.inlineKeyboard(
+                [
+                    Markup.button.webApp("Launch BuxHub!", LinksEnum.TELEGRAM_MINI_APP_URL),
+                    Markup.button.url("Join Community!", LinksEnum.CHANNEL_URL),
+                ],
+                {
+                    columns: 1
+                }
+            ))
     }
 
     @Command("admin")
@@ -108,25 +122,25 @@ export class TelegramService extends Telegraf<Context> {
     @Hears(EnumButtons.CREATE_TASK)
     @UseGuards(TelegramGuard)
     async create_task(@Ctx() ctx: Context) {
-        ctx.scene.enter("create-task") 
-    } 
+        ctx.scene.enter("create-task")
+    }
 
     @Hears(EnumButtons.CREATE_SUB_TASK)
     @UseGuards(TelegramGuard)
     async createSubTask(@Ctx() ctx: Context) {
-        ctx.scene.enter("create-sub") 
+        ctx.scene.enter("create-sub")
     }
 
     @Hears(EnumButtons.DELETE_TASK)
     @UseGuards(TelegramGuard)
     async deleteTask(@Ctx() ctx: Context) {
-        ctx.scene.enter("delete-task") 
+        ctx.scene.enter("delete-task")
     }
 
     @Hears(EnumButtons.UPDATE_TASK)
     @UseGuards(TelegramGuard)
     async updateTask(@Ctx() ctx: Context) {
-        ctx.scene.enter("update-task") 
+        ctx.scene.enter("update-task")
     }
 
     @On("text")
@@ -139,19 +153,19 @@ export class TelegramService extends Telegraf<Context> {
             const userInfo = await this.telegram.getChat(telegram_id.toString())
             const photo = await this.telegram.getUserProfilePhotos(Number(telegram_id))
             let fileUrl: string
-    
+
             if (photo.total_count > 0) {
                 const lastPhotoSet = photo.photos[0]
-    
+
                 const lastPhoto = lastPhotoSet[lastPhotoSet.length - 1]
-    
+
                 const file = await this.telegram.getFile(lastPhoto.file_id)
                 const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
-    
+
                 fileUrl = `https://api.telegram.org/file/bot${token}/${file.file_path}`
             }
-    
-            return  {
+
+            return {
                 ...userInfo,
                 photo: fileUrl
             }

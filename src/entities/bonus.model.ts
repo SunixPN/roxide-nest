@@ -16,6 +16,9 @@ export class Bonus extends Model<Bonus, ICreateBonus> {
     @Column({ type: INTEGER, allowNull: false, defaultValue: 0 })
     currentDay: number
 
+    @Column({ allowNull: false, defaultValue: new Date(), type: DATE })
+    next_welcome_date: Date
+
     @BelongsTo(() => User)
     User: User
 
