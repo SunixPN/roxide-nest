@@ -97,7 +97,10 @@ export class TelegramService extends Telegraf<Context> {
                     [
                         Markup.button.webApp("Launch BuxHub", LinksEnum.TELEGRAM_MINI_APP_URL),
                         Markup.button.url("Join Community!", LinksEnum.CHANNEL_URL),
-                    ]
+                    ],
+                    {
+                        columns: 1
+                    }
                 )
             }
         )
