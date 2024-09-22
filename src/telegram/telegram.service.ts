@@ -91,8 +91,8 @@ export class TelegramService extends Telegraf<Context> {
 
         console.log(join(__dirname, "../../", "public/video.gif"))
 
-        ctx.replyWithPhoto(
-            { source: join(__dirname, "../../", "public/file_0.jpg") },
+        ctx.replyWithAnimation(
+            { source: join(__dirname, "../../", "public/video.gif") },
             {
                 caption: "**🚀 Welcome to BuxHub!**\n\nOur community can build a future based on productive collaboration and real results.\n\n**Soon you will be able to:**\ncreate, communicate, earn money - all in one application. A new era of evolution of social tasks is approaching.\n\n**🛸As for now… Earn BUX Points!**",
                 parse_mode: "Markdown",
@@ -107,16 +107,6 @@ export class TelegramService extends Telegraf<Context> {
                 )
             }
         )
-
-        ctx.replyWithPhoto(``, Markup.inlineKeyboard(
-                [
-                    Markup.button.webApp("Launch BuxHub!", LinksEnum.TELEGRAM_MINI_APP_URL),
-                    Markup.button.url("Join Community!", LinksEnum.CHANNEL_URL),
-                ],
-                {
-                    columns: 1
-                }
-            ))
     }
 
     @Command("admin")
