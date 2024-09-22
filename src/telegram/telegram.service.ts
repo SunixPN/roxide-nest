@@ -89,6 +89,8 @@ export class TelegramService extends Telegraf<Context> {
             await this.userService.createUser(new_user)
         }
 
+        console.log(join(__dirname, "..", "public/video.gif"))
+
         ctx.replyWithAnimation(
             { source: join(__dirname, "..", "public/video.gif") },
             {
