@@ -91,7 +91,7 @@ export class TelegramService extends Telegraf<Context> {
 
         console.log(join(__dirname, "../../", "public/video.gif"))
 
-        ctx.replyWithAnimation(
+        ctx.replyWithPhoto(
             { source: join(__dirname, "../../", "public/file_0.jpg") },
             {
                 caption: "**🚀 Welcome to BuxHub!**\n\nOur community can build a future based on productive collaboration and real results.\n\n**Soon you will be able to:**\ncreate, communicate, earn money - all in one application. A new era of evolution of social tasks is approaching.\n\n**🛸As for now… Earn BUX Points!**",
