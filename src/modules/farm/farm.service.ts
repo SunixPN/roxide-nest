@@ -79,7 +79,7 @@ export class FarmService {
 
     const diff = ((new Date()).getTime() - farm.startTime.getTime()) / 3600000
 
-    if (diff >= 12) {
+    if (diff >= 3) {
       return EnumFarmStatus.CLAIM
     }
 
