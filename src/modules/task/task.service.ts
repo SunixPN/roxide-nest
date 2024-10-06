@@ -36,6 +36,32 @@ export class TaskService {
         }
     }
 
+    async getAllTasks() {
+        return this.taskRepository.findAll({
+            where: {
+                main_task_id: null
+            },
+            include: [
+                {
+                    model: Task,
+                    as: 'sub_tasks',
+                }
+            ],
+            order: [
+                ["id", "DESC"],
+                ["sub_tasks", "id", "DESC"]
+            ]
+        })
+    }
+
+    async getAllSubTasks(main_id: number) {
+        return this.taskRepository.findAll({
+            where: {
+                 main_task_id: main_id
+            }
+        })
+    }
+
     async findTaskByName(title: string, dont_check: boolean = false, findArchive: boolean = false) {
         let task: Task
         if (findArchive) {
@@ -106,7 +132,8 @@ export class TaskService {
     async getAllTaskFromArchive() {
         const tasks = await this.taskRepository.findAll({
             where: {
-                is_archive: true
+                is_archive: true,
+                main_task_id: null
             },
             include: [
                 {
