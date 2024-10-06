@@ -22,8 +22,8 @@ export type IChatWithLink = {
 } & ChatFromGetChat
 
 @Injectable()
-@Wizard("create-task")
-export class CreateTaskScene {
+@Wizard("create-main-task")
+export class CreateMainTaskScene {
 
     constructor(private readonly taskService: TaskService) { }
 
@@ -127,146 +127,6 @@ export class CreateTaskScene {
     @Action("YT")
     async step5_yt(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.YOUTUBE
-        await ctx.reply("Select the link type: ", Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Link to external resources", "OUTER"),
-                Markup.button.callback("Link to telegram channel", "INNER"),
-            ]
-        ))
-        ctx.wizard.next()
-
-    }
-
-    @WizardStep(5)
-    @Action("TG")
-    async step5_tg(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        ctx.wizard.state.icon = EnumIcons.TELEGRAM
-        await ctx.reply("Select the link type: ", Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Link to external resources", "OUTER"),
-                Markup.button.callback("Link to telegram channel", "INNER"),
-            ]
-        ))
-        ctx.wizard.next()
-
-    }
-
-    @WizardStep(5)
-    @Action("TW")
-    async step5_tw(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        ctx.wizard.state.icon = EnumIcons.TWITTER
-        await ctx.reply("Select the link type: ", Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Link to external resources", "OUTER"),
-                Markup.button.callback("Link to telegram channel", "INNER"),
-            ]
-        ))
-        ctx.wizard.next()
-
-    }
-
-    @WizardStep(5)
-    @Action("FB")
-    async step5_fc(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        ctx.wizard.state.icon = EnumIcons.FACEBOOK
-        await ctx.reply("Select the link type: ", Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Link to external resources", "OUTER"),
-                Markup.button.callback("Link to telegram channel", "INNER"),
-            ]
-        ))
-        ctx.wizard.next()
-
-    }
-
-    @WizardStep(5)
-    @Action("IN")
-    async step5_in(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        ctx.wizard.state.icon = EnumIcons.INSTAGRAM
-        await ctx.reply("Select the link type: ", Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Link to external resources", "OUTER"),
-                Markup.button.callback("Link to telegram channel", "INNER"),
-            ]
-        ))
-        ctx.wizard.next()
-
-    }
-
-    @WizardStep(6)
-    @On("text")
-    async step6_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        await ctx.reply("Select the link type: ", Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Link to external resources", "OUTER"),
-                Markup.button.callback("Link to telegram channel", "INNER"),
-            ]
-        ))
-        return
-    }
-
-    @WizardStep(6)
-    @Action("OUTER")
-    async step6_out(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Enter link: ")
-        ctx.wizard.state.link_type = "OUTER"
-        ctx.wizard.next()
-    }
-
-    @WizardStep(6)
-    @Action("INNER")
-    async step6_inner(@Ctx() ctx: IWizardContext) {
-        ctx.reply("Enter the telegram channel (@[channel name]) (Make sure the bot is the administrator of this channel): ")
-        ctx.wizard.state.link_type = "INNER"
-        ctx.wizard.next()
-    }
-
-    @WizardStep(7)
-    async step7_out(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
-        if (ctx.wizard.state.link_type === "INNER") {
-            try {
-                const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
-                const chat = await ctx.telegram.getChat(message)
-
-                console.log(chat)
-
-                if (chatMember.status !== "administrator") {
-                    await ctx.reply("Check if the bot is the admin of this channel and try again: ")
-                    return
-                }
-
-                else {
-                    ctx.wizard.state.channel_id = message
-                    const chatWithLink = chat as IChatWithLink
-                    const link = chatWithLink.username ? `https://t.me/${chatWithLink.username}` : chatWithLink.invite_link ?? null
-                    ctx.wizard.state.channel_link = link
-                }
-            }
-
-            catch {
-                await ctx.reply("Check if the bot is the admin of this channel and try again: ")
-                return
-            }
-        }
-
-        else if (ctx.wizard.state.link_type === "OUTER") {
-            const urlPattern = new RegExp(
-                '^(https?:\\/\\/)?' +
-                '((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' +
-                '((\\d{1,3}\\.){3}\\d{1,3}))' +
-                '(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' +
-                '(\\?[;&a-zA-Z\\d%_.~+=-]*)?' +
-                '(\\#[-a-zA-Z\\d_]*)?$', 'i'
-            )
-
-            if (!urlPattern.test(message)) {
-                await ctx.reply("Incorrect URL format! Try again: ")
-                return
-            }
-
-            ctx.wizard.state.link = message
-        }
-
         const state = ctx.wizard.state
 
         await this.taskService.createTask({
@@ -277,11 +137,97 @@ export class CreateTaskScene {
             channel_id: state.channel_id,
             main_task_id: null,
             channel_link: state.channel_link,
-            icon: state.icon
+            icon: state.icon,
+            is_archive: true
         })
-        await ctx.reply("The task has been successfully created !")
+        await ctx.reply("The main task has been successfully add to archive !")
+        ctx.scene.leave()
+
+    }
+
+    @WizardStep(5)
+    @Action("TG")
+    async step5_tg(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.TELEGRAM
+        const state = ctx.wizard.state
+
+        await this.taskService.createTask({
+            title: state.title,
+            description: state.description,
+            coins: state.coins,
+            link: state.link,
+            channel_id: state.channel_id,
+            main_task_id: null,
+            channel_link: state.channel_link,
+            icon: state.icon,
+            is_archive: true
+        })
+        await ctx.reply("The main task has been successfully add to archive !")
         ctx.scene.leave()
     }
 
+    @WizardStep(5)
+    @Action("TW")
+    async step5_tw(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.TWITTER
+        const state = ctx.wizard.state
 
+        await this.taskService.createTask({
+            title: state.title,
+            description: state.description,
+            coins: state.coins,
+            link: state.link,
+            channel_id: state.channel_id,
+            main_task_id: null,
+            channel_link: state.channel_link,
+            icon: state.icon,
+            is_archive: true
+        })
+        await ctx.reply("The main task has been successfully add to archive !")
+        ctx.scene.leave()
+
+    }
+
+    @WizardStep(5)
+    @Action("FB")
+    async step5_fc(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.FACEBOOK
+        const state = ctx.wizard.state
+
+        await this.taskService.createTask({
+            title: state.title,
+            description: state.description,
+            coins: state.coins,
+            link: state.link,
+            channel_id: state.channel_id,
+            main_task_id: null,
+            channel_link: state.channel_link,
+            icon: state.icon,
+            is_archive: true
+        })
+        await ctx.reply("The main task has been successfully add to archive !")
+        ctx.scene.leave()
+
+    }
+
+    @WizardStep(5)
+    @Action("IN")
+    async step5_in(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        ctx.wizard.state.icon = EnumIcons.INSTAGRAM
+        const state = ctx.wizard.state
+
+        await this.taskService.createTask({
+            title: state.title,
+            description: state.description,
+            coins: state.coins,
+            link: state.link,
+            channel_id: state.channel_id,
+            main_task_id: null,
+            channel_link: state.channel_link,
+            icon: state.icon,
+            is_archive: true
+        })
+        await ctx.reply("The main task has been successfully add to archive !")
+        ctx.scene.leave()
+    }
 }

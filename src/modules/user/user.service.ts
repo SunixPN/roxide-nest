@@ -1,6 +1,6 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { QueryTypes } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
 import { Bonus } from 'src/entities/bonus.model';
 import { Farm } from 'src/entities/farm.model';
 import { ICreateUser, User } from 'src/entities/user.model';
@@ -99,6 +99,18 @@ export class UserService {
         await Promise.all(promises)
 
         return info
+    }
+
+    async getAllUser(tg_id: number) {
+        const users = await this.userRepository.findAll({
+            where: {
+                telegramId: {
+                    [Op.ne]: BigInt(tg_id)
+                }
+            }
+        })
+
+        return users
     }
 
     private async infoSet(info: any, user: User) {

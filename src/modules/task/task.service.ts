@@ -36,18 +36,39 @@ export class TaskService {
         }
     }
 
-    async findTaskByName(title: string, dont_check: boolean = false) {
-        const task = await this.taskRepository.findOne({
-            where: {
-                title: title
-            }
-        })
+    async findTaskByName(title: string, dont_check: boolean = false, findArchive: boolean = false) {
+        let task: Task
+        if (findArchive) {
+            task = await this.taskRepository.findOne({
+                where: {
+                    title: title,
+                    is_archive: true
+                }
+            })
+        }
+
+        else {
+            task = await this.taskRepository.findOne({
+                where: {
+                    title: title
+                }
+            })
+        }
+
 
         if (!task && !dont_check) {
             throw new BadRequestException("Task not found")
         }
 
         return task
+    }
+
+    async deleteFromArchive(task_id: number) {
+        const deleteTaskFromArchive = await this.findTask(task_id)
+
+        deleteTaskFromArchive.is_archive = false
+
+        await deleteTaskFromArchive.save()
     }
 
     async createSubTask(task: ITaskCreate, main_task_id: number) {
@@ -77,14 +98,36 @@ export class TaskService {
             link: task.link ?? updateTask.link,
             channel_id: task.channel_id ?? updateTask.channel_id,
             coins: task.coins ?? updateTask.coins,
-            icon: task.icon ?? updateTask.icon
+            icon: task.icon ?? updateTask.icon,
+            is_archive: updateTask.is_archive
         })
+    }
+
+    async getAllTaskFromArchive() {
+        const tasks = await this.taskRepository.findAll({
+            where: {
+                is_archive: true
+            },
+            include: [
+                {
+                    model: Task,
+                    as: 'sub_tasks',
+                }
+            ],
+            order: [
+                ["id", "DESC"],
+                ["sub_tasks", "id", "DESC"]
+            ]
+        })
+
+        return tasks
     }
 
     async getAllTasksWithUser(user: User) {
         const tasks = await this.taskRepository.findAll({
             where: {
-                main_task_id: null
+                main_task_id: null,
+                is_archive: false
             },
 
             include: [

@@ -11,6 +11,7 @@ import { EnumButtons } from 'src/enums/buttons.enum';
 import { TelegramGuard } from 'src/guards/telegram.guard';
 import { LinksEnum } from 'src/enums/links.enum';
 import { join } from 'path';
+import { TaskService } from 'src/modules/task/task.service';
 
 type Context = Scenes.SceneContext
 
@@ -22,6 +23,7 @@ export class TelegramService extends Telegraf<Context> {
         @InjectModel(Revenues) private readonly revenuesRepository: typeof Revenues,
         private readonly userService: UserService,
         private readonly configService: ConfigService,
+        private readonly taskService: TaskService
     ) {
         super(configService.get<string>("TELEGRAM_BOT_TOKEN"))
     }
@@ -89,8 +91,8 @@ export class TelegramService extends Telegraf<Context> {
             await this.userService.createUser(new_user)
         }
 
-        ctx.replyWithAnimation(
-            { source: join(__dirname, "../../", "public/video.gif") },
+        ctx.replyWithPhoto(
+            { source: join(__dirname, "../../", "public/image.jpg") },
             {
                 caption: "🚀<b>Welcome to BuxHub!</b>\n\nOur community can build a future based on productive collaboration and real results.\n\n<b>Soon you will be able to:</b>\ncreate, communicate, earn money - all in one application. A new era of evolution of social tasks is approaching.\n\n🛸<b>As for now… Earn BUX Points!</b>",
                 parse_mode: "HTML",
@@ -117,6 +119,57 @@ export class TelegramService extends Telegraf<Context> {
     @UseGuards(TelegramGuard)
     async create_task(@Ctx() ctx: Context) {
         ctx.scene.enter("create-task")
+    }
+
+    @Hears(EnumButtons.MESSAGE_DISTRIBUTION)
+    @UseGuards(TelegramGuard)
+    async message(@Ctx() ctx: Context) {
+        ctx.scene.enter("message")
+    }
+
+    @Hears(EnumButtons.VIEW_ARCHIVE)
+    @UseGuards(TelegramGuard)
+    async view(@Ctx() ctx: Context) {
+        const tasksFromArchive = await this.taskService.getAllTaskFromArchive()
+        if (tasksFromArchive.length === 0) {
+            await ctx.reply("There are no tasks in archive")
+            return
+        }
+        let valueString: string = "List of tasks✉️\n----------------------------------------------------\n"
+        for (let i = 0; i < tasksFromArchive.length; i++) {
+            valueString += `${i + 1}. Title: ${tasksFromArchive[i].dataValues.title}`
+
+            const subTasks = tasksFromArchive[i].dataValues.sub_tasks
+
+            if (subTasks.length !== 0) {
+                valueString += `\n----------------------sub tasks✉️-----------------------------\n`
+                for (let j = 0; j < subTasks.length; j++) {
+                    valueString += `\t\t\t\t${i + 1}-${j + 1}. Title: ${subTasks[j].dataValues.title}`
+                    if (j + 1 !== subTasks.length) {
+                        valueString += "\n"
+                    }
+                }
+                valueString += `\n------------------------------------------------------------`
+            }
+
+            valueString += "\n"
+        }
+
+        await ctx.reply(valueString)
+
+        console.log(tasksFromArchive)
+    }
+
+    @Hears(EnumButtons.CREATE_MAIN_TASK)
+    @UseGuards(TelegramGuard)
+    async create_main_task(@Ctx() ctx: Context) {
+        ctx.scene.enter("create-main-task")
+    }
+
+    @Hears(EnumButtons.DELETE_FROM_ARCHIVE)
+    @UseGuards(TelegramGuard)
+    async delete_from_archive(@Ctx() ctx: Context) {
+        ctx.scene.enter("delete-from-archive")
     }
 
     @Hears(EnumButtons.CREATE_SUB_TASK)

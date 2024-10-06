@@ -11,6 +11,9 @@ import { CreateTaskScene } from './scenes/create.scene';
 import { CreateSubScene } from './scenes/createSub.scene';
 import { DeleteScene } from './scenes/delete.scene';
 import { UpdateTaskScene } from './scenes/update.scene';
+import { CreateMainTaskScene } from './scenes/createMain.scene';
+import { DeleteFromArchive } from './scenes/deleteFromArchive.scene';
+import { MessageDistributeScene } from './scenes/messageDistribute.scene';
 
 @Module({
     imports: [
@@ -19,7 +22,7 @@ import { UpdateTaskScene } from './scenes/update.scene';
         forwardRef(() => UserModule),
         forwardRef(() => TaskModule)
     ],
-    providers: [TelegramService, CreateTaskScene, CreateSubScene, DeleteScene, UpdateTaskScene],
+    providers: [TelegramService, CreateTaskScene, CreateSubScene, DeleteScene, UpdateTaskScene, CreateMainTaskScene, DeleteFromArchive, MessageDistributeScene],
     exports: [TelegramService]
 })
 export class TelegramModule {}
