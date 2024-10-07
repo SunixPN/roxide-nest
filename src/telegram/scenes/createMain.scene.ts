@@ -97,13 +97,20 @@ export class CreateMainTaskScene {
     @On("text")
     async step5_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
-            await ctx.reply("Select the link type: ", Markup.inlineKeyboard(
-                [
-                    Markup.button.callback("Link to external resources", "OUTER"),
-                    Markup.button.callback("Link to telegram channel", "INNER"),
-                ]
-            ))
-            ctx.wizard.next()
+            const state = ctx.wizard.state
+
+            await this.taskService.createTask({
+                title: state.title,
+                description: state.description,
+                coins: state.coins,
+                link: state.link,
+                channel_id: state.channel_id,
+                main_task_id: null,
+                channel_link: state.channel_link,
+                is_archive: true
+            })
+            await ctx.reply("The main task has been successfully add to archive !")
+            ctx.scene.leave()
         }
 
         else {
