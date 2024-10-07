@@ -59,10 +59,7 @@ export class User extends Model<User, ICreateUser> {
       const previous = instance.previous("coins")
       const currentCoins = instance.coins
 
-      console.log(instance, "INSTANCE")
-
       if (instance.referrerId) {
-
         const ref_user = await User.findOne({
             where: {
                 id: instance.referrerId
