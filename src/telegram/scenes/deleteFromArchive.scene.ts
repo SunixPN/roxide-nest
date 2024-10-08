@@ -37,6 +37,7 @@ export class DeleteFromArchive {
     @Action(/^delete_task_(\d+)$/)
     async deleteTask(@Ctx() ctx: IWizardContext) {
         if ("callback_query" in ctx.update && "data" in ctx.update.callback_query) {
+            
             try {
                 const data = ctx.update.callback_query.data as string
                 const id = data.split("_")[2]
