@@ -216,7 +216,6 @@ export class TelegramService extends Telegraf<Context> {
         }
 
         catch (e) {
-            
             console.log(e.message)
         }
     }
