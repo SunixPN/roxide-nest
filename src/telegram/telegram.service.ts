@@ -30,7 +30,6 @@ export class TelegramService extends Telegraf<Context> {
 
     @Start()
     async index(@Ctx() ctx: Context) {
-        console.log(ctx.from.id)
         const candidate = await this.userRepository.findOne({
             where: {
                 telegramId: ctx.from.id
@@ -156,8 +155,6 @@ export class TelegramService extends Telegraf<Context> {
         }
 
         await ctx.reply(valueString)
-
-        console.log(tasksFromArchive)
     }
 
     @Hears(EnumButtons.CREATE_MAIN_TASK)

@@ -56,12 +56,10 @@ export class DeleteScene {
 
     @Action(/^delete_task_(\d+)$/)
     async deleteTask(@Ctx() ctx: WizardContext) {
-        console.log(ctx.update)
         if ("callback_query" in ctx.update && "data" in ctx.update.callback_query) {
             try {
                 const data = ctx.update.callback_query.data as string
                 const id = data.split("_")[2]
-                console.log(id)
 
                 await this.taskService.deleteTask(parseInt(id))
                 await ctx.reply("Task has been deleted successfully.");

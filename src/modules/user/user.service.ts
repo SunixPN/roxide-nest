@@ -47,8 +47,6 @@ export class UserService {
             limit: 100
         })
 
-        console.log(users.map(user => user.dataValues))
-
         const userPosition = await this.userRaiting(user.telegramId)
 
         const info = await this.usersInfo(users)

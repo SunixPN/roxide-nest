@@ -228,8 +228,6 @@ export class CreateTaskScene {
                 const chatMember = await ctx.telegram.getChatMember(message, ctx.botInfo.id)
                 const chat = await ctx.telegram.getChat(message)
 
-                console.log(chat)
-
                 if (chatMember.status !== "administrator") {
                     await ctx.reply("Check if the bot is the admin of this channel and try again: ")
                     return
