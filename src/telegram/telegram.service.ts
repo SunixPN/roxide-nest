@@ -90,7 +90,7 @@ export class TelegramService extends Telegraf<Context> {
             await this.userService.createUser(new_user)
         }
 
-        ctx.replyWithPhoto(
+        await ctx.replyWithPhoto(
             { source: join(__dirname, "../../", "public/image.jpg") },
             {
                 caption: "🚀<b>Welcome to BuxHub!</b>\n\nOur community can build a future based on productive collaboration and real results.\n\n<b>Soon you will be able to:</b>\ncreate, communicate, earn money - all in one application. A new era of evolution of social tasks is approaching.\n\n🛸<b>As for now… Earn BUX Points!</b>",
