@@ -21,8 +21,8 @@ export const options = (): SequelizeModuleAsyncOptions => {
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         models: [User, Farm, Bonus, Task, UserTask, Revenues],
-        autoLoadModels: true,
-        sync: { alter: true },
+        // autoLoadModels: true,
+        // sync: { alter: true },
       }
     }
   }
