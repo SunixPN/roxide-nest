@@ -9,76 +9,93 @@ import { HookReturn } from 'sequelize/types/hooks'
 import { EnumRoles } from 'src/enums/roles.enum'
 
 export interface ICreateUser {
-  telegramId: bigint,
-  referrerId?: number
+	telegramId: bigint,
+	referrerId?: number
 }
 
 @Table
 export class User extends Model<User, ICreateUser> {
-  @Column({ type: BIGINT, unique: true, allowNull: false })
-  telegramId: bigint
+	@Column({ type: BIGINT, unique: true, allowNull: false })
+	telegramId: bigint
 
-  @ForeignKey(() => User)
-  @Column({ type: INTEGER, allowNull: true, onUpdate: 'cascade', onDelete: 'set null' })
-  referrerId: number
+	@ForeignKey(() => User)
+	@Column({ type: INTEGER, allowNull: true, onUpdate: 'cascade', onDelete: 'set null' })
+	referrerId: number
 
-  @Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
-  coins: number
+	@Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
+	coins: number
 
-  @Column({ type: INTEGER, allowNull: false, defaultValue: 15 })
-  referals_count: number
+	@Column({ type: INTEGER, allowNull: false, defaultValue: 15 })
+	referals_count: number
 
-  @Column({ type: DataType.ENUM("admin", "user"), allowNull: false, defaultValue: "user" })
-  role: EnumRoles
+	@Column({ type: DataType.ENUM("admin", "user"), allowNull: false, defaultValue: "user" })
+	role: EnumRoles
 
-  @HasOne(() => Farm)
-  Farm: Farm
+	@HasOne(() => Farm)
+	Farm: Farm
 
-  @HasOne(() => Bonus)
-  Bonus: Bonus
+	@HasOne(() => Bonus)
+	Bonus: Bonus
 
-  @HasOne(() => Revenues)
-  Revenues: Revenues
+	@HasOne(() => Revenues)
+	Revenues: Revenues
 
-  @BelongsTo(() => User, 'referrerId')
-  Referrer: User
+	@BelongsTo(() => User, 'referrerId')
+	Referrer: User
 
-  @HasMany(() => User, 'referrerId')
-  Referrals: User[]
+	@HasMany(() => User, 'referrerId')
+	Referrals: User[]
 
-  @Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
-  day_revenues: number
+	@Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
+	day_revenues: number
 
-  @BelongsToMany(() => Task, () => UserTask)
-  tasks: Task[]
+	@BelongsToMany(() => Task, () => UserTask)
+	tasks: Task[]
 
-  @AfterUpdate
-  static async afterUpdateModel(instance: User): Promise<HookReturn> {
-    if (instance.changed("coins") && !instance.changed("day_revenues")) {
+	@AfterUpdate
+	static async afterUpdateModel(instance: User): Promise<HookReturn> {
+		if (instance.changed("coins") && !instance.changed("day_revenues")) {
 
-      const previous = instance.previous("coins")
-      const currentCoins = instance.coins
+			const previous = instance.previous("coins")
+			const currentCoins = instance.coins
 
-      if (instance.referrerId) {
-        const ref_user = await User.findOne({
-            where: {
-                id: instance.referrerId
-            }
-        })
+			if (instance.referrerId) {
+				const ref_user = await User.findOne({
+					where: {
+						id: instance.referrerId
+					}
+				})
 
-        const revenues = await ref_user.$get("Revenues")
-        
-        if ( !(revenues.next_revenues_time.getTime() <= new Date().getTime()) ) {
-            revenues.coins += (currentCoins - previous) * 0.05
-            instance.day_revenues += (currentCoins - previous) * 0.05
-  
-            await revenues.save()
-            await instance.save()
-        }
+				let refForUser: User
+				let revenuesForUser: Revenues
 
-      }
-    }
+				const revenues = await ref_user.$get("Revenues")
 
-    return Promise.resolve()
-  }
+				if (ref_user.referrerId) {
+					refForUser = await User.findOne({
+						where: {
+							id: ref_user.referrerId
+						}
+					})
+	
+					revenuesForUser = await refForUser.$get("Revenues")
+				}
+
+				if (!(revenues.next_revenues_time.getTime() <= new Date().getTime())) {
+					revenues.coins += (currentCoins - previous) * 0.05
+					instance.day_revenues += (currentCoins - previous) * 0.05
+
+					if (revenuesForUser) {
+						revenuesForUser.coins += (currentCoins - previous) * 0.025
+						await revenuesForUser.save()
+					}
+
+					await revenues.save()
+					await instance.save()
+				}
+			}
+		}
+
+		return Promise.resolve()
+	}
 }
