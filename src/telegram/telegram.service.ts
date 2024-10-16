@@ -12,6 +12,7 @@ import { TelegramGuard } from 'src/guards/telegram.guard';
 import { LinksEnum } from 'src/enums/links.enum';
 import { join } from 'path';
 import { TaskService } from 'src/modules/task/task.service';
+import { randomColor } from 'src/helpers/randomColor';
 
 type Context = Scenes.SceneContext
 
@@ -38,7 +39,8 @@ export class TelegramService extends Telegraf<Context> {
 
         if (!candidate) {
             const new_user: ICreateUser = {
-                telegramId: BigInt(ctx.from.id)
+                telegramId: BigInt(ctx.from.id),
+                color: randomColor()
             }
 
             const referal_id = ctx.text.split(" ")[1]
@@ -52,7 +54,7 @@ export class TelegramService extends Telegraf<Context> {
                     include: ["Referrals", "Revenues"]
                 })
 
-                if (!ref_user || ref_user.Referrals.length >= ref_user.referals_count) {
+                if (!ref_user) {
                     ctx.reply(`Hi, @${ctx.from.username}! This invite link doesn't work, find another one and try again`, Markup.inlineKeyboard(
                         [
                             Markup.button.url("Join the community!", LinksEnum.CHANNEL_URL),

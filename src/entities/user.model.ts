@@ -1,5 +1,5 @@
 import { Column, Table, Model, HasOne, ForeignKey, HasMany, BelongsTo, BelongsToMany, AfterUpdate, DataType } from 'sequelize-typescript'
-import { BIGINT, FLOAT, INTEGER } from 'sequelize'
+import { BIGINT, FLOAT, INTEGER, STRING } from 'sequelize'
 import { Farm } from './farm.model'
 import { Bonus } from './bonus.model'
 import { Task } from './task.model'
@@ -10,7 +10,8 @@ import { EnumRoles } from 'src/enums/roles.enum'
 
 export interface ICreateUser {
 	telegramId: bigint,
-	referrerId?: number
+	referrerId?: number,
+	color: string
 }
 
 @Table
@@ -18,15 +19,15 @@ export class User extends Model<User, ICreateUser> {
 	@Column({ type: BIGINT, unique: true, allowNull: false })
 	telegramId: bigint
 
+	@Column({ type: STRING, allowNull: false, defaultValue: "#000" })
+	color: string
+
 	@ForeignKey(() => User)
 	@Column({ type: INTEGER, allowNull: true, onUpdate: 'cascade', onDelete: 'set null' })
 	referrerId: number
 
 	@Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
 	coins: number
-
-	@Column({ type: INTEGER, allowNull: false, defaultValue: 15 })
-	referals_count: number
 
 	@Column({ type: DataType.ENUM("admin", "user"), allowNull: false, defaultValue: "user" })
 	role: EnumRoles
