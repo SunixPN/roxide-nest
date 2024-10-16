@@ -28,7 +28,6 @@ export class ReferralService {
 
 		const returnInfo = referals.map(user => ({
             ...user.dataValues,
-			color: randomColor(),
             ...info.find(inf => inf.id === user.id)
         }))
 

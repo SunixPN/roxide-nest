@@ -40,6 +40,7 @@ export class TelegramService extends Telegraf<Context> {
         if (!candidate) {
             const new_user: ICreateUser = {
                 telegramId: BigInt(ctx.from.id),
+                color: randomColor()
             }
 
             const referal_id = ctx.text.split(" ")[1]
