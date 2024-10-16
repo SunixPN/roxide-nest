@@ -11,16 +11,12 @@ import { EnumRoles } from 'src/enums/roles.enum'
 export interface ICreateUser {
 	telegramId: bigint,
 	referrerId?: number,
-	color: string
 }
 
 @Table
 export class User extends Model<User, ICreateUser> {
 	@Column({ type: BIGINT, unique: true, allowNull: false })
 	telegramId: bigint
-
-	@Column({ type: STRING, allowNull: false, defaultValue: "#000" })
-	color: string
 
 	@ForeignKey(() => User)
 	@Column({ type: INTEGER, allowNull: true, onUpdate: 'cascade', onDelete: 'set null' })

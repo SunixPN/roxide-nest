@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { User } from '../../entities/user.model'
 import { TelegramService } from 'src/telegram/telegram.service'
 import { UserService } from '../user/user.service'
+import { randomColor } from 'src/helpers/randomColor'
 
 @Injectable()
 export class ReferralService {
@@ -27,6 +28,7 @@ export class ReferralService {
 
 		const returnInfo = referals.map(user => ({
             ...user.dataValues,
+			color: randomColor(),
             ...info.find(inf => inf.id === user.id)
         }))
 
