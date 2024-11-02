@@ -13,6 +13,7 @@ import { TaskModule } from './modules/task/task.module';
 import { RevenuesModule } from './modules/revenues/revenues.module';
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { join } from 'path'
     BonusModule,
     UserModule,
     TaskModule,
-    RevenuesModule
+    RevenuesModule,
+    FilesModule
   ],
   controllers: []
 })
