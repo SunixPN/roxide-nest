@@ -12,7 +12,7 @@ import { UserModule } from './modules/user/user.module';
 import { TaskModule } from './modules/task/task.module';
 import { RevenuesModule } from './modules/revenues/revenues.module';
 import { ServeStaticModule } from '@nestjs/serve-static'
-import path, { join } from 'path'
+import * as path from 'path'
 
 @Module({
   imports: [
