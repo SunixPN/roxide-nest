@@ -120,6 +120,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
             const fileId = ctx.message.document.file_id
             const file = await this.telegram.getFileLink(fileId) 
             const saveFilePath = await this.photoService.downloadAndSavePhoto(file.href)
+            console.log(saveFilePath)
             if (saveFilePath) {
                 ctx.wizard.state.task_picrute = saveFilePath
             }
@@ -144,6 +145,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
     async step6_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
             const state = ctx.wizard.state
+            console.log(state)
 
             await this.taskService.createTask({
                 title: state.title,
