@@ -13,7 +13,8 @@ export interface ITaskCreate {
     main_task_id: number,
     channel_link?: string,
     icon?: EnumIcons,
-    is_archive?: boolean
+    is_archive?: boolean,
+    task_picrute?: string
 }
 
 @Table
@@ -27,6 +28,9 @@ export class Task extends Model<Task, ITaskCreate> {
 
   @Column({ allowNull: true, type: STRING })
   link: string
+
+  @Column({ allowNull: true, type: STRING })
+  task_picture: string
 
   @Column({ allowNull: true, type: STRING })
   channel_id: string

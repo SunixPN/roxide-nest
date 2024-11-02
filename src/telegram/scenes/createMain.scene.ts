@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { Action, Ctx, Hears, Message, On, Wizard, WizardStep } from "nestjs-telegraf";
 import { ITaskCreate } from "src/entities/task.model";
 import { EnumButtons } from "src/enums/buttons.enum";
 import { EnumIcons } from "src/enums/icons.enum";
+import { PhotoService } from "src/modules/photo/photo.service";
 import { TaskService } from "src/modules/task/task.service";
-import { Markup, Scenes } from "telegraf";
+import { Context, Markup, Scenes, Telegraf } from "telegraf";
 import { ChatFromGetChat } from "telegraf/typings/core/types/typegram";
 import { WizardContext } from "telegraf/typings/scenes";
 
@@ -18,14 +20,18 @@ export interface IWizardContext extends WizardContext {
 
 export type IChatWithLink = {
     invite_link?: string,
-    username: string
+    username: string,
 } & ChatFromGetChat
 
 @Injectable()
 @Wizard("create-main-task")
-export class CreateMainTaskScene {
+export class CreateMainTaskScene extends Telegraf<Context> {
 
-    constructor(private readonly taskService: TaskService) { }
+    constructor(
+        private readonly taskService: TaskService, 
+        private readonly configService: ConfigService,
+        private readonly photoService: PhotoService
+    ) { super(configService.get<string>("TELEGRAM_BOT_TOKEN")) }
 
     @Hears(EnumButtons.BACK)
     async back(@Ctx() ctx: IWizardContext) {
@@ -77,6 +83,15 @@ export class CreateMainTaskScene {
 
         else {
             ctx.wizard.state.coins = +message
+            await ctx.reply("Please, download image (as file), or type /empty to skip this step: ")
+            ctx.wizard.next()
+        }
+    }
+
+    @WizardStep(5)
+    @On("text")
+    async step5_text(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+        if (message === "/empty") {
             await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
                 [
                     Markup.button.callback("Youtube", "YT"),
@@ -91,11 +106,42 @@ export class CreateMainTaskScene {
             ))
             ctx.wizard.next()
         }
+
+        else {
+            await ctx.reply("Please, download image (as file), or type /empty to skip this step: ")
+            return
+        }
     }
 
     @WizardStep(5)
+    @On("document")
+    async step5_doc(@Ctx() ctx: IWizardContext) {
+        if ("document" in ctx.message) {
+            const fileId = ctx.message.document.file_id
+            const file = await this.telegram.getFileLink(fileId) 
+            const saveFilePath = await this.photoService.downloadAndSavePhoto(file.href)
+            if (saveFilePath) {
+                ctx.wizard.state.task_picrute = saveFilePath
+            }
+        }
+        await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
+            [
+                Markup.button.callback("Youtube", "YT"),
+                Markup.button.callback("Telegram", "TG"),
+                Markup.button.callback("Twitter", "TW"),
+                Markup.button.callback("Facebook", "FB"),
+                Markup.button.callback("Instagram", "IN"),
+            ],
+            {
+                columns: 2
+            }
+        ))
+        ctx.wizard.next()
+    }
+
+    @WizardStep(6)
     @On("text")
-    async step5_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    async step6_empty(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         if (message === "/empty") {
             const state = ctx.wizard.state
 
@@ -107,7 +153,8 @@ export class CreateMainTaskScene {
                 channel_id: state.channel_id,
                 main_task_id: null,
                 channel_link: state.channel_link,
-                is_archive: true
+                is_archive: true,
+                task_picrute: state.task_picrute ?? null
             })
             await ctx.reply("The main task has been successfully add to archive !")
             ctx.scene.leave()
@@ -130,9 +177,9 @@ export class CreateMainTaskScene {
         }
     }
 
-    @WizardStep(5)
+    @WizardStep(6)
     @Action("YT")
-    async step5_yt(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    async step6_yt(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.YOUTUBE
         const state = ctx.wizard.state
 
@@ -145,16 +192,17 @@ export class CreateMainTaskScene {
             main_task_id: null,
             channel_link: state.channel_link,
             icon: state.icon,
-            is_archive: true
+            is_archive: true,
+            task_picrute: state.task_picrute ?? null
         })
         await ctx.reply("The main task has been successfully add to archive !")
         ctx.scene.leave()
 
     }
 
-    @WizardStep(5)
+    @WizardStep(6)
     @Action("TG")
-    async step5_tg(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    async step6_tg(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.TELEGRAM
         const state = ctx.wizard.state
 
@@ -173,9 +221,9 @@ export class CreateMainTaskScene {
         ctx.scene.leave()
     }
 
-    @WizardStep(5)
+    @WizardStep(6)
     @Action("TW")
-    async step5_tw(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    async step6_tw(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.TWITTER
         const state = ctx.wizard.state
 
@@ -195,9 +243,9 @@ export class CreateMainTaskScene {
 
     }
 
-    @WizardStep(5)
+    @WizardStep(6)
     @Action("FB")
-    async step5_fc(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    async step6_fc(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.FACEBOOK
         const state = ctx.wizard.state
 
@@ -217,9 +265,9 @@ export class CreateMainTaskScene {
 
     }
 
-    @WizardStep(5)
+    @WizardStep(6)
     @Action("IN")
-    async step5_in(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
+    async step6_in(@Message("text") message: string, @Ctx() ctx: IWizardContext) {
         ctx.wizard.state.icon = EnumIcons.INSTAGRAM
         const state = ctx.wizard.state
 

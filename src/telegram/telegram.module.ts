@@ -14,13 +14,15 @@ import { UpdateTaskScene } from './scenes/update.scene';
 import { CreateMainTaskScene } from './scenes/createMain.scene';
 import { DeleteFromArchive } from './scenes/deleteFromArchive.scene';
 import { MessageDistributeScene } from './scenes/messageDistribute.scene';
+import { PhotoModule } from 'src/modules/photo/photo.module';
 
 @Module({
     imports: [
         TelegrafModule.forRootAsync(options()),
         SequelizeModule.forFeature([User, Revenues]),
         forwardRef(() => UserModule),
-        forwardRef(() => TaskModule)
+        forwardRef(() => TaskModule),
+        PhotoModule
     ],
     providers: [TelegramService, CreateTaskScene, CreateSubScene, DeleteScene, UpdateTaskScene, CreateMainTaskScene, DeleteFromArchive, MessageDistributeScene],
     exports: [TelegramService]
