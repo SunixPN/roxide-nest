@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
+import { generateRandomString } from "../../helpers/getRandomString"
 
 @Injectable()
 export class PhotoService {
