@@ -14,7 +14,7 @@ export interface ITaskCreate {
     channel_link?: string,
     icon?: EnumIcons,
     is_archive?: boolean,
-    task_picrute?: string
+    task_picture?: string
 }
 
 @Table

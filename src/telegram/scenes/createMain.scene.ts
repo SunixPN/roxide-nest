@@ -122,7 +122,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
             const saveFilePath = await this.photoService.downloadAndSavePhoto(file.href)
             console.log(saveFilePath)
             if (saveFilePath) {
-                ctx.wizard.state.task_picrute = saveFilePath
+                ctx.wizard.state.task_picture = saveFilePath
             }
         }
         await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
@@ -156,7 +156,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
                 main_task_id: null,
                 channel_link: state.channel_link,
                 is_archive: true,
-                task_picrute: state.task_picrute ?? null
+                task_picture: state.task_picture ?? null
             })
             await ctx.reply("The main task has been successfully add to archive !")
             ctx.scene.leave()
@@ -195,7 +195,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
             channel_link: state.channel_link,
             icon: state.icon,
             is_archive: true,
-            task_picrute: state.task_picrute ?? null
+            task_picture: state.task_picture ?? null
         })
         await ctx.reply("The main task has been successfully add to archive !")
         ctx.scene.leave()
@@ -218,7 +218,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
             channel_link: state.channel_link,
             icon: state.icon,
             is_archive: true,
-            task_picrute: state.task_picrute ?? null
+            task_picture: state.task_picture ?? null
         })
         await ctx.reply("The main task has been successfully add to archive !")
         ctx.scene.leave()
@@ -240,7 +240,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
             channel_link: state.channel_link,
             icon: state.icon,
             is_archive: true,
-            task_picrute: state.task_picrute ?? null
+            task_picture: state.task_picture ?? null
         })
         await ctx.reply("The main task has been successfully add to archive !")
         ctx.scene.leave()
@@ -263,7 +263,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
             channel_link: state.channel_link,
             icon: state.icon,
             is_archive: true,
-            task_picrute: state.task_picrute ?? null
+            task_picture: state.task_picture ?? null
         })
         await ctx.reply("The main task has been successfully add to archive !")
         ctx.scene.leave()
@@ -286,7 +286,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
             channel_link: state.channel_link,
             icon: state.icon,
             is_archive: true,
-            task_picrute: state.task_picrute ?? null
+            task_picture: state.task_picture ?? null
         })
         await ctx.reply("The main task has been successfully add to archive !")
         ctx.scene.leave()
