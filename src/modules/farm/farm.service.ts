@@ -48,6 +48,7 @@ export class FarmService {
 
       farm.startTime = null
       user.coins = user.coins + 150
+      user.farm_user_coins += 150
 
       await user.save()
       await farm.save()

@@ -1,5 +1,5 @@
 import { Column, Table, Model, HasOne, ForeignKey, HasMany, BelongsTo, BelongsToMany, AfterUpdate, DataType } from 'sequelize-typescript'
-import { BIGINT, FLOAT, INTEGER, STRING } from 'sequelize'
+import { BIGINT, FLOAT, INTEGER, NUMBER, STRING } from 'sequelize'
 import { Farm } from './farm.model'
 import { Bonus } from './bonus.model'
 import { Task } from './task.model'
@@ -7,11 +7,13 @@ import { UserTask } from './userTask.model'
 import { Revenues } from './revenues.model'
 import { HookReturn } from 'sequelize/types/hooks'
 import { EnumRoles } from 'src/enums/roles.enum'
+import { EnumLanguages } from 'src/enums/languages.enum'
 
 export interface ICreateUser {
 	telegramId: bigint,
 	referrerId?: number,
-	color: string
+	color: string,
+	username: string
 }
 
 @Table
@@ -22,15 +24,33 @@ export class User extends Model<User, ICreateUser> {
 	@Column({ type: STRING, allowNull: false, defaultValue: "#000" })
 	color: string
 
+	@Column({ type: DataType.ENUM("en", "ru"), allowNull: false, defaultValue: "ru"  })
+	user_lng: EnumLanguages
+
+	@Column({ type: STRING, allowNull: false })
+	username: string
+
 	@ForeignKey(() => User)
 	@Column({ type: INTEGER, allowNull: true, onUpdate: 'cascade', onDelete: 'set null' })
 	referrerId: number
 
+	@Column({ type: INTEGER, allowNull: false, defaultValue: 0 })
+	referals_count: number
+
 	@Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
 	coins: number
 
+	@Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
+	farm_user_coins: number
+
 	@Column({ type: DataType.ENUM("admin", "user"), allowNull: false, defaultValue: "user" })
 	role: EnumRoles
+
+	@Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
+	task_completed: number
+
+	@Column({ type: FLOAT, allowNull: false, defaultValue: 0 })
+	task_total_coin: number
 
 	@HasOne(() => Farm)
 	Farm: Farm

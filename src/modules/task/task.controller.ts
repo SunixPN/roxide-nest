@@ -10,18 +10,6 @@ export class TaskController {
     private readonly taskService: TaskService
     ) {}
 
-  @Post("/create")
-  @UseGuards(AuthGuard)
-  createTask(@Body() task: ITaskCreate) {
-    return this.taskService.createTask(task)
-  }
-
-  @Post("/create-sub/:id")
-  @UseGuards(AuthGuard)
-  createSubTask(@Body() task: ITaskCreate, @Param("id") id: string) {
-    return this.taskService.createSubTask(task, +id)
-  }
-
   @Get("/all-tasks-with-user")
   @UseGuards(AuthGuard)
   allTasksWithUser(@Req() { user }) {

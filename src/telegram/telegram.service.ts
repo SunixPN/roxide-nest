@@ -40,7 +40,8 @@ export class TelegramService extends Telegraf<Context> {
         if (!candidate) {
             const new_user: ICreateUser = {
                 telegramId: BigInt(ctx.from.id),
-                color: randomColor()
+                color: randomColor(),
+                username: ctx.from.username
             }
 
             const referal_id = ctx.text.split(" ")[1]
@@ -77,6 +78,16 @@ export class TelegramService extends Telegraf<Context> {
                 }
 
                 new_user.referrerId = ref_user.id
+                const second_level_ref_user = await this.userRepository.findOne({
+                    where: {
+                        id: ref_user.referrerId
+                    }
+                })
+
+                if (second_level_ref_user) {
+                    second_level_ref_user.referals_count += 1
+                    await second_level_ref_user.save()
+                }
             }
 
             else {

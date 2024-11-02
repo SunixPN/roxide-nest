@@ -4,6 +4,7 @@ import { Op, QueryTypes } from 'sequelize';
 import { Bonus } from 'src/entities/bonus.model';
 import { Farm } from 'src/entities/farm.model';
 import { ICreateUser, User } from 'src/entities/user.model';
+import { EnumLanguages } from 'src/enums/languages.enum';
 import { TelegramService } from 'src/telegram/telegram.service';
 
 interface IResult {
@@ -36,6 +37,17 @@ export class UserService {
 
         await user.$set("Farm", farm)
         await user.$set("Bonus", bonus)
+    }
+
+    async changeLanguage(user: User, lang: EnumLanguages) {
+        user.user_lng = lang
+        await user.save()
+
+        return {
+            status: "Ok",
+            message: "success",
+            language: user.user_lng
+        }
     }
 
     async usersRaiting(user: User) {

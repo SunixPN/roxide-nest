@@ -363,9 +363,16 @@ export class TaskService {
                 const userMainTask = await this.findUserTask(user.id, task.main_task_id)
 
                 userMainTask.task_status = EnumTaskStatus.COMPLETED
+                user.task_completed += 1
+                await user.save()
 
                 await userMainTask.save()
             }
+        }
+
+        else {
+            user.task_completed += 1
+            await user.save()
         }
     }
 
@@ -414,6 +421,7 @@ export class TaskService {
 
         userTask.task_status = EnumTaskStatus.CLAIMED
         user.coins += task.coins
+        user.task_total_coin += task.coins
 
         await user.save()
         await userTask.save()
