@@ -12,14 +12,13 @@ import { UserModule } from './modules/user/user.module';
 import { TaskModule } from './modules/task/task.module';
 import { RevenuesModule } from './modules/revenues/revenues.module';
 import { ServeStaticModule } from '@nestjs/serve-static'
-import { join } from 'path'
-import { FilesModule } from './files/files.module';
+import path, { join } from 'path'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, "..", "public"),
+      rootPath: path.resolve(__dirname, "..", "public"),
     }),
     SequelizeModule.forRootAsync(options()),
     FarmModule,
@@ -28,8 +27,7 @@ import { FilesModule } from './files/files.module';
     BonusModule,
     UserModule,
     TaskModule,
-    RevenuesModule,
-    FilesModule
+    RevenuesModule
   ],
   controllers: []
 })
