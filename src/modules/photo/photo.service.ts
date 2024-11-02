@@ -8,9 +8,9 @@ import { generateRandomString } from "../../helpers/getRandomString"
 export class PhotoService {
   private readonly publicPath = path.join(__dirname, "../../../", 'public');
 
-  async downloadAndSavePhoto(fileUrl: string): Promise<string> {
+  async downloadAndSavePhoto(fileUrl: string, file: string): Promise<string> {
     const fileName = generateRandomString()
-    const localFilePath = path.join(this.publicPath, fileName);
+    const localFilePath = path.join(this.publicPath, fileName + file);
     
     const response = await axios.get(fileUrl, { responseType: 'stream' });
     const writer = fs.createWriteStream(localFilePath);
@@ -21,6 +21,6 @@ export class PhotoService {
       writer.on('error', reject);
     });
     
-    return `/public/${fileName}`;
+    return `/public/${fileName + file}`;
   }
 }

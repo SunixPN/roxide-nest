@@ -119,7 +119,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
         if ("document" in ctx.message) {
             const fileId = ctx.message.document.file_id
             const file = await this.telegram.getFileLink(fileId) 
-            const saveFilePath = await this.photoService.downloadAndSavePhoto(file.href)
+            const saveFilePath = await this.photoService.downloadAndSavePhoto(file.href, ctx.message.document.file_name)
             console.log(saveFilePath)
             if (saveFilePath) {
                 ctx.wizard.state.task_picture = saveFilePath
