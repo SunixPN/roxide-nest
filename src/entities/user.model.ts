@@ -27,7 +27,7 @@ export class User extends Model<User, ICreateUser> {
 	@Column({ type: DataType.ENUM("en", "ru"), allowNull: false, defaultValue: "ru"  })
 	user_lng: EnumLanguages
 
-	@Column({ type: STRING, allowNull: false, defaultValue: null })
+	@Column({ type: STRING, allowNull: true, defaultValue: null })
 	username: string
 
 	@ForeignKey(() => User)
