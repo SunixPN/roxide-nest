@@ -18,7 +18,7 @@ import * as path from 'path'
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ServeStaticModule.forRoot({
-      rootPath: path.resolve(__dirname, "..", "public"),
+      rootPath: path.resolve(__dirname, "..", ""),
     }),
     SequelizeModule.forRootAsync(options()),
     FarmModule,
