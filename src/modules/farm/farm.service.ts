@@ -15,7 +15,8 @@ export class FarmService {
     return {
       status: this.checkStatus(farm),
       start_time: farm.startTime,
-      coins: user.coins
+      coins: user.coins,
+      language: user.user_lng
     }
   }
 
