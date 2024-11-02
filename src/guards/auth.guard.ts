@@ -25,8 +25,7 @@ export class AuthGuard implements CanActivate {
 
         const authDataSplit = authHeader.split(" ")[1]
 
-        // const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
-        const token = "1862342138:AAFmB3jCRSKjYzyR0zOZQMD5ZUeI0V0zMUo"
+        const token = this.configService.get<string>("TELEGRAM_BOT_TOKEN")
 
         const urlParams: URLSearchParams = new URLSearchParams(authDataSplit)
         const hash = urlParams.get("hash")
