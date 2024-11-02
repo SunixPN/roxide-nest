@@ -7,6 +7,6 @@ export class FilesController {
 
   @Get("/:filename")
   async getFile(@Param("filename") filename: string, @Res() res: any) {
-    res.sendFile(filename, { root: "/public" })
+    res.sendFile(filename, { root: "../public" })
   }
 }
