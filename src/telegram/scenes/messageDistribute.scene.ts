@@ -3,13 +3,15 @@ import { Action, Ctx, Hears, Message, On, Wizard, WizardStep } from "nestjs-tele
 import { EnumButtons } from "src/enums/buttons.enum";
 import { UserService } from "src/modules/user/user.service";
 import { Markup, Scenes } from "telegraf";
-import { PhotoSize } from "telegraf/typings/core/types/typegram";
+import { InlineKeyboardButton, PhotoSize } from "telegraf/typings/core/types/typegram";
 import { WizardContext } from "telegraf/typings/scenes";
 
 interface MyWizard extends Scenes.WizardContextWizard<Scenes.WizardContext<Scenes.WizardSessionData>> {
     state: {
         message: string,
-        photo: PhotoSize
+        photo: PhotoSize,
+        buttonLink: string,
+        buttonText: string
     }
 }
 
@@ -38,38 +40,85 @@ export class MessageDistributeScene {
     @WizardStep(2)
     async step2(@Message("text") message: string, @Ctx() ctx: IWizardContextMessage) {
         ctx.wizard.state.message = message
-        await ctx.reply(`Confirm action or add picture: The message you want to send\n${message}`, Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Confirm", "CF"),
-                Markup.button.callback("Add picture", "PC"),
-                Markup.button.callback("Reject", "RG"),
-            ]
-        ))
+        const buttons = ctx.wizard.state.buttonLink ? Markup.inlineKeyboard([
+            Markup.button.callback("Confirm", "CF"),
+            Markup.button.callback("Add picture", "PC"),
+            Markup.button.callback("Reject", "RG"),
+        ]) : Markup.inlineKeyboard([
+            Markup.button.callback("Confirm", "CF"),
+            Markup.button.callback("Add picture", "PC"),
+            Markup.button.callback("Reject", "RG"),
+            Markup.button.callback("Add buttonLink", "LK")
+        ])
+
+        await ctx.reply(`Confirm action or add picture: The message you want to send\n${message}`, buttons)
         ctx.wizard.next()
     }
 
     @WizardStep(3)
     @On("message")
     async step3_message(@Ctx() ctx: IWizardContextMessage) {
-        await ctx.reply(`Confirm action or add picture: The message you want to send\n${ctx.wizard.state.message}`, Markup.inlineKeyboard(
-            [
-                Markup.button.callback("Confirm", "CF"),
-                Markup.button.callback("Add picture", "PC"),
-                Markup.button.callback("Reject", "RG"),
-            ]
-        ))
+        const buttons = ctx.wizard.state.buttonLink ? Markup.inlineKeyboard([
+            Markup.button.callback("Confirm", "CF"),
+            Markup.button.callback("Add picture", "PC"),
+            Markup.button.callback("Reject", "RG"),
+        ]) : Markup.inlineKeyboard([
+            Markup.button.callback("Confirm", "CF"),
+            Markup.button.callback("Add picture", "PC"),
+            Markup.button.callback("Reject", "RG"),
+            Markup.button.callback("Add buttonLink", "LK")
+        ])
+
+        await ctx.reply(`Confirm action or add picture: The message you want to send\n${ctx.wizard.state.message}`, buttons)
+    }
+
+    @WizardStep(3)
+    @Action("LK")
+    async step3_lc(@Ctx() ctx: IWizardContextMessage) {
+        await ctx.reply("Please, enter the link")
+        ctx.wizard.selectStep(5);
+    }
+
+    @WizardStep(6)
+    async step6_lc(@Message("text") message: string, @Ctx() ctx: IWizardContextMessage) {
+        console.log(message)
+        ctx.wizard.state.buttonLink = message
+        ctx.wizard.selectStep(6);
+        await this.step7_lc(ctx)
+    }
+
+    @WizardStep(7)
+    async step7_lc(@Ctx() ctx: IWizardContextMessage) {
+        await ctx.reply("Please, enter the text form button")
+        ctx.wizard.next();
+    }
+
+    @WizardStep(8)
+    async step8_lc(@Message("text") message: string, @Ctx() ctx: IWizardContextMessage) {
+        console.log(message)
+        ctx.wizard.state.buttonText = message
+        ctx.wizard.selectStep(1);
+        await this.step2(ctx.wizard.state.message, ctx);
     }
 
     @WizardStep(3)
     @Action("CF")
     async step3_reg(@Ctx() ctx: IWizardContextMessage) {
         const users = await this.userService.getAllUser(ctx.from.id)
+        const keyBoard: InlineKeyboardButton[][] = ctx.wizard.state.buttonLink ? [
+            [{ text: ctx.wizard.state.buttonText, url: ctx.wizard.state.buttonLink }]
+        ] : null
         await Promise.all(users.map(async user => {
             try {
                 await ctx.telegram.sendMessage(
                     user.telegramId.toString(),
                     ctx.wizard.state.message,
-                    { parse_mode: "HTML", }
+                    { 
+                        parse_mode: "HTML",
+                        reply_markup: keyBoard ? {
+                            inline_keyboard: keyBoard
+                        } : undefined,
+                    }
                 )
             }
 
@@ -122,6 +171,10 @@ export class MessageDistributeScene {
     @WizardStep(5)
     @Action("Conf")
     async step6_message(@Ctx() ctx: IWizardContextMessage) {
+        const keyBoard: InlineKeyboardButton[][] = ctx.wizard.state.buttonLink ? [
+            [{ text: ctx.wizard.state.buttonText, url: ctx.wizard.state.buttonLink }]
+        ] : null
+
         const users = await this.userService.getAllUser(ctx.from.id)
         await Promise.all(users.map(async user => {
             try {
@@ -130,7 +183,10 @@ export class MessageDistributeScene {
                     ctx.wizard.state.photo.file_id,
                     {
                         caption: ctx.wizard.state.message,
-                        parse_mode: "HTML"
+                        parse_mode: "HTML",
+                        reply_markup: keyBoard ? {
+                            inline_keyboard: keyBoard
+                        } : undefined,
                     }
                 )
             }
