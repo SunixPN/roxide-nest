@@ -61,6 +61,9 @@ export class TelegramService extends Telegraf<Context> {
                             Markup.button.url("Join the community!", LinksEnum.CHANNEL_URL),
                         ]
                     ))
+
+                    await this.userService.createUser(new_user)
+                    
                     return
                 }
 
