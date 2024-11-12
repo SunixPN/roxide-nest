@@ -90,16 +90,6 @@ export class TelegramService extends Telegraf<Context> {
                 }
             }
 
-            else {
-                ctx.reply(`Hi, @${ctx.from.username}! First, find the invite link for yourself`, Markup.inlineKeyboard(
-                    [
-                        Markup.button.url("Join the community!", LinksEnum.CHANNEL_URL),
-                    ]
-                ))
-
-                return
-            }
-
             await this.userService.createUser(new_user)
         }
 
