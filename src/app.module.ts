@@ -12,6 +12,7 @@ import { UserModule } from './modules/user/user.module';
 import { TaskModule } from './modules/task/task.module';
 import { RevenuesModule } from './modules/revenues/revenues.module';
 import { ServeStaticModule } from '@nestjs/serve-static'
+import { ProxyModule } from './modules/proxy/proxy.module';
 import * as path from 'path'
 
 @Module({
@@ -27,7 +28,8 @@ import * as path from 'path'
     BonusModule,
     UserModule,
     TaskModule,
-    RevenuesModule
+    RevenuesModule,
+    ProxyModule
   ],
   controllers: []
 })

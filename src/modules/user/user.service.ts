@@ -64,8 +64,11 @@ export class UserService {
         const info = await this.usersInfo(users)
 
         const returnInfo = users.map(user => ({
-            ...user.dataValues,
-            ...info.find(inf => inf.id === user.id)
+            active_usernames: info.find(inf => inf.id === user.id).active_usernames,
+            coins: user.coins,
+            telegramId: user.telegramId,
+            // ...user.dataValues,
+            // ...info.find(inf => inf.id === user.id)
         }))
 
         return {
