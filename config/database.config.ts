@@ -14,7 +14,7 @@ export const options = (): SequelizeModuleAsyncOptions => {
     useFactory: (config: ConfigService): SequelizeModuleOptions => {
       return {
         dialect: 'postgres',
-        uri: config.get<string>("DATABASE_URL"),
+        // uri: config.get<string>("DATABASE_URL"),
         host: config.get<string>('DB_HOST'),
         port: +config.get<string>('DB_PORT'),
         username: config.get('DB_USERNAME'),
