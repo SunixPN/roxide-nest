@@ -198,9 +198,8 @@ export class TelegramService extends Telegraf<Context> {
         ctx.reply("Hi! To start working with the bot, enter the /start command")
     }
 
-    async getUserInfo(telegram_id: bigint) {
+    async getPhoto(telegram_id: string) {
         try {
-            const userInfo = await this.telegram.getChat(telegram_id.toString())
             const photo = await this.telegram.getUserProfilePhotos(Number(telegram_id))
             let fileUrl: string
 
@@ -214,6 +213,19 @@ export class TelegramService extends Telegraf<Context> {
 
                 fileUrl = `https://api.telegram.org/file/bot${token}/${file.file_path}`
             }
+
+            return fileUrl
+        }
+
+        catch (e) {
+            console.log(e.message)
+        }
+    }
+
+    async getUserInfo(telegram_id: bigint) {
+        try {
+            const userInfo = await this.telegram.getChat(telegram_id.toString())
+            const fileUrl = `https://roxide-dev.up.railway.app/proxy/avatar/${telegram_id.toString()}`
 
             return {
                 ...userInfo,
