@@ -28,4 +28,26 @@ export class ProxyController {
       res.status(500).send('Internal server error');
     }
   }
+
+  @Get("main_task/:file_id")
+  async getMainTaskPicture(@Param('file_id') file_id: string, @Res() res: Response) {
+    try {
+      const fileHref = await this.telegramService.getFile(file_id)
+      if (fileHref) {
+        const response = await axios.get(fileHref, { responseType: "stream" })
+        res.setHeader('Content-Type', response.headers['content-type']);
+        response.data.pipe(res); 
+      }
+
+      else {
+        res.status(404).send('Picture not found');
+      }
+      
+    }
+
+    catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+    }
+  }
 }

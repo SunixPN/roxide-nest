@@ -198,6 +198,17 @@ export class TelegramService extends Telegraf<Context> {
         ctx.reply("Hi! To start working with the bot, enter the /start command")
     }
 
+    async getFile(file_id: string) {
+        try {
+            const file = await this.telegram.getFileLink(file_id) 
+            return file.href
+        }
+
+        catch (err) {
+            console.log(err)
+        } 
+    }
+
     async getPhoto(telegram_id: string) {
         try {
             const photo = await this.telegram.getUserProfilePhotos(Number(telegram_id))

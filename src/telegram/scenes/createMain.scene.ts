@@ -30,7 +30,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
     constructor(
         private readonly taskService: TaskService, 
         private readonly configService: ConfigService,
-        private readonly photoService: PhotoService
+        private readonly photoService: PhotoService,
     ) { super(configService.get<string>("TELEGRAM_BOT_TOKEN")) }
 
     @Hears(EnumButtons.BACK)
@@ -118,11 +118,9 @@ export class CreateMainTaskScene extends Telegraf<Context> {
     async step5_doc(@Ctx() ctx: IWizardContext) {
         if ("document" in ctx.message) {
             const fileId = ctx.message.document.file_id
-            const file = await this.telegram.getFileLink(fileId) 
-            const saveFilePath = await this.photoService.downloadAndSavePhoto(file.href, ctx.message.document.file_name)
-            console.log(saveFilePath)
-            if (saveFilePath) {
-                ctx.wizard.state.task_picture = saveFilePath
+            if (fileId) {
+                const fileUrl = `https://roxide-dev.up.railway.app/proxy/main_task/${fileId}`
+                ctx.wizard.state.task_picture = fileUrl
             }
         }
         await ctx.reply("Select the icon type\nOr type /empty to skip this step: ", Markup.inlineKeyboard(
