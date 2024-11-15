@@ -236,7 +236,7 @@ export class TelegramService extends Telegraf<Context> {
     async getUserInfo(telegram_id: bigint) {
         try {
             const userInfo = await this.telegram.getChat(telegram_id.toString())
-            const fileUrl = `https://roxide-dev.up.railway.app/proxy/avatar/${telegram_id.toString()}`
+            const fileUrl = `https://api.bux-hub.pro/proxy/avatar/${telegram_id.toString()}`
 
             return {
                 ...userInfo,

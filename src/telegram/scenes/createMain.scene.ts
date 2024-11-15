@@ -119,7 +119,7 @@ export class CreateMainTaskScene extends Telegraf<Context> {
         if ("document" in ctx.message) {
             const fileId = ctx.message.document.file_id
             if (fileId) {
-                const fileUrl = `https://roxide-dev.up.railway.app/proxy/main_task/${fileId}`
+                const fileUrl = `https://api.bux-hub.pro/proxy/main_task/${fileId}`
                 ctx.wizard.state.task_picture = fileUrl
             }
         }
