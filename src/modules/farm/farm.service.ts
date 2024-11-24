@@ -48,8 +48,8 @@ export class FarmService {
     if (status === EnumFarmStatus.CLAIM) {
 
       farm.startTime = null
-      user.coins = user.coins + 150
-      user.farm_user_coins += 150
+      user.coins = user.coins + 40
+      user.farm_user_coins += 40
 
       await user.save()
       await farm.save()

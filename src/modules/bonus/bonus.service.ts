@@ -66,6 +66,7 @@ export class BonusService {
     }
 
     async bonusClaim(user: User) {
+        
         const bonus = await user.$get("Bonus")
 
         if (bonus.next_bonus_time.getTime() > new Date().getTime()) {
